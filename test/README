@@ -1,0 +1,49 @@
+
+This directory is intended for PlatformIO Test Runner and project tests.
+
+Unit Testing is a software testing method by which individual units of
+source code, sets of one or more MCU program modules together with associated
+control data, usage procedures, and operating procedures, are tested to
+determine whether they are fit for use. Unit testing finds problems early
+in the development cycle.
+
+More information about PlatformIO Unit Testing:
+- https://docs.platformio.org/en/latest/advanced/unit-testing/index.html
+#include <Arduino.h>
+#include <SimpleFOC.h>
+
+#include "kth78xx.h"
+// BLDC motor & driver instance
+BLDCDriver6PWM driver = BLDCDriver6PWM(PA8, PA11, PA9, PA12, PA10, PB1);
+// sensor reading function
+float readSensor();
+void initSensor();
+GenericSensor sensor = GenericSensor(readSensor, initSensor);
+
+float readSensor()
+{
+  return read_angle();
+}
+
+void initSensor()
+{
+  kth7812_init();
+}
+
+void setup()
+{
+  // monitoring port
+  Serial.begin(115200);
+  sensor.init();
+  _delay(1000);
+}
+
+void loop()
+{
+  sensor.update();
+
+  // display the angle and the angular velocity to the terminal
+  Serial.print(sensor.getAngle());
+  Serial.print("\t");
+  Serial.println(sensor.getVelocity());
+}

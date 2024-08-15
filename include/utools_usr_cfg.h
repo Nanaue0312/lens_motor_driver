@@ -1,0 +1,23 @@
+#ifndef __UTOOLS_USER_CFG_H__
+#define __UTOOLS_USER_CFG_H__
+
+// 支持usleep函数和sleep函数
+#define FREERTOS_STD_SLEEP_FUNC_ENABLE 1
+
+// 开始稳定间隔调用器
+#define UTOOLS_STABLE_INTERVAL_INVOKER_ENABLE 1
+
+// 日志功能
+#define UTOOLS_LOGGER_ENABLE 1
+
+// 时间戳功能使用stm32 HAL库
+#define UTOOLS_TIMESTAMP_FUNC UTOOLS_TIMESTAMP_STM32_HAL
+
+// 协同任务功能中的任务函数使用FreeRTOS任务函数
+#define UTOOLS_COLLAB_TASK_ENABLE 1
+#define UTOOLS_THREAD_FUNCATION UTOOLS_FREERTOS_TASK_FUNCATION
+
+// 协同任务功能中的函数包装器,用于生成c的函数指针
+#define UTOOLS_COLLAB_FUNC_WRAPPER_ENABLE 1
+
+#endif // __UTOOLS_USER_CFG_H__

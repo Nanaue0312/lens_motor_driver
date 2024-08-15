@@ -1,0 +1,39 @@
+{
+  "build": {
+    "core": "stm32",
+    "cpu": "cortex-m4",
+    "extra_flags": "-DSTM32F3 -DSTM32F302xC",
+    "f_cpu": "72000000L",
+    "mcu": "stm32f302cbt6",
+    "product_line": "STM32F302xC",
+    "variant": "STM32F3xx/F302C(B-C)T"
+  },
+  "connectivity": [
+    "can"
+  ],
+  "debug": {
+    "jlink_device": "STM32F302CB",
+    "openocd_target": "stm32f3x",
+    "svd_path": "STM32F30x.svd"
+  },
+  "frameworks": [
+    "arduino",
+    "cmsis",
+    "stm32cube",
+    "libopencm3"
+  ],
+  "name": "STM32F302CB (32k RAM. 128k Flash)",
+  "upload": {
+    "maximum_ram_size": 32768,
+    "maximum_size": 131072,
+    "protocol": "stlink",
+    "protocols": [
+      "jlink",
+      "cmsis-dap",
+      "stlink",
+      "blackmagic"
+    ]
+  },
+  "url": "https://www.st.com/en/microcontrollers-microprocessors/stm32f302cb.html",
+  "vendor": "Generic"
+}
