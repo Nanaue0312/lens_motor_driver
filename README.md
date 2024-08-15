@@ -10,7 +10,7 @@
 
 通过如下指令获取项目代码：
 ```sh
-git clone --recurse-submodules https://github.com/camerakang/BC_RVF_M.git
+git clone --recurse-submodules https://codeup.aliyun.com/629f6370487c500c27f60603/versatile/focus_motor_driver.git
 ```
 
 ### 2.2 安装STM32支持库
