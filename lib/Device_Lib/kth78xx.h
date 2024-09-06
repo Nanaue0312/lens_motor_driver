@@ -2,7 +2,8 @@
 #define __KTH78XX_H
 #include "Arduino.h"
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 #define B_Pin GPIO_PIN_0
 #define B_GPIO_Port GPIOA
@@ -33,26 +34,24 @@ extern "C" {
 #define LED_B_GPIO_Port GPIOA
 #define U_LIN_Pin GPIO_PIN_3
 #define U_LIN_GPIO_Port GPIOB
-/* Includes ------------------------------------------------------------------*/
-extern SPI_HandleTypeDef hspi2;
-void MX_GPIO_Init(void);
-void MX_SPI2_Init(void);
-void MX_DMA_Init(void);
+    /* Includes ------------------------------------------------------------------*/
+    extern SPI_HandleTypeDef hspi2;
+    void MX_GPIO_Init(void);
+    void MX_SPI2_Init(void);
+    void MX_DMA_Init(void);
 
-#define KTH78_READ_ANGLE          0x00
-#define KTH78_READ_REG            (0x01 << 6)
-#define KTH78_WRITE_REG           (0x03 << 6)
-#define KTH78_WRITE_MTP           (0x02 << 6)
+#define KTH78_READ_ANGLE 0x00
+#define KTH78_READ_REG (0x01 << 6)
+#define KTH78_WRITE_REG (0x03 << 6)
+#define KTH78_WRITE_MTP (0x02 << 6)
 
-#define KTH78_NON_DATA            0x00
-float read_angle();
-void kth7812_init();
-float readSensor();
-void initSensor();
-// uint16_t KTH78_ReadAngle(void);
-// uint8_t KTH78_ReadReg(uint8_t addr);
-// uint8_t KTH78_WriteReg(uint8_t addr, uint8_t data);
-// uint8_t KTH78_WriteMTP(uint8_t addr, uint8_t data);
+#define KTH78_NON_DATA 0x00
+    float kth7812_read_angle();
+    void kth7812_init();
+    // uint16_t KTH78_ReadAngle(void);
+    // uint8_t KTH78_ReadReg(uint8_t addr);
+    // uint8_t KTH78_WriteReg(uint8_t addr, uint8_t data);
+    // uint8_t KTH78_WriteMTP(uint8_t addr, uint8_t data);
 
 #ifdef __cplusplus
 }
