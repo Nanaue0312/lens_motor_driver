@@ -8,7 +8,6 @@
 **************************************************/
 
 #include "kth78xx.h"
-#include "utools.h"
 
 SPI_HandleTypeDef hspi2;
 DMA_HandleTypeDef hdma_spi2_rx;
@@ -329,5 +328,4 @@ void kth7812_init()
     // // printf("write:%d\r\n", KTH78_WriteReg(0x07, 0xc0));
     // printf("0x07:%d\r\n", KTH78_ReadReg(0x07));
     // printf("Sensor ready\r\n");
-    UTINFO("kth7812 sensor ready.");
 }
