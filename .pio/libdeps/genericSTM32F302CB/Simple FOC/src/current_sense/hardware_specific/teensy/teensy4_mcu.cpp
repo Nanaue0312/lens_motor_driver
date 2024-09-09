@@ -9,7 +9,7 @@
 // - Teensy 4.1 
 #if defined(__arm__) && defined(CORE_TEENSY) && ( defined(__IMXRT1062__) || defined(ARDUINO_TEENSY40) || defined(ARDUINO_TEENSY41) || defined(ARDUINO_TEENSY_MICROMOD) )
 
-// #define SIMPLEFOC_TEENSY4_ADC_INTERRUPT_DEBUG
+// #define TEENSY4_ADC_INTERRUPT_DEBUG
 
 
 volatile uint32_t val0, val1, val2;
@@ -28,7 +28,7 @@ void read_currents(uint32_t *a, uint32_t*b, uint32_t *c=nullptr){
 // interrupt service routine for the ADC_ETC0
 // reading the ADC values and clearing the interrupt
 void adcetc0_isr() {
-#ifdef SIMPLEFOC_TEENSY4_ADC_INTERRUPT_DEBUG
+#ifdef TEENSY4_ADC_INTERRUPT_DEBUG
   digitalWrite(30,HIGH);
 #endif
  // page 3509 , section 66.5.1.3.3
@@ -37,21 +37,21 @@ void adcetc0_isr() {
   val0 = (ADC_ETC_TRIG0_RESULT_1_0 & 4095);
   // val1 = lp2((ADC_ETC_TRIG0_RESULT_1_0 >> 16) & 4095);
   val1 = (ADC_ETC_TRIG0_RESULT_1_0 >> 16) & 4095;
-#ifdef SIMPLEFOC_TEENSY4_ADC_INTERRUPT_DEBUG
+#ifdef TEENSY4_ADC_INTERRUPT_DEBUG
   digitalWrite(30,LOW);
 #endif
 }
 
 
 void adcetc1_isr() {
-#ifdef SIMPLEFOC_TEENSY4_ADC_INTERRUPT_DEBUG
+#ifdef TEENSY4_ADC_INTERRUPT_DEBUG
   digitalWrite(30,HIGH);
 #endif
  // page 3509 , section 66.5.1.3.3
  ADC_ETC_DONE0_1_IRQ |= 1 << 16;   // clear Done1 for trg0 at 16th bit
  val2 = ADC_ETC_TRIG0_RESULT_3_2  & 4095;
 //  val2 = lp3( ADC_ETC_TRIG0_RESULT_3_2  & 4095);
-#ifdef SIMPLEFOC_TEENSY4_ADC_INTERRUPT_DEBUG
+#ifdef TEENSY4_ADC_INTERRUPT_DEBUG
   digitalWrite(30,LOW);
 #endif
 }
@@ -167,7 +167,7 @@ void* _configureADCLowSide(const void* driver_params, const int pinA,const int p
 
   SIMPLEFOC_DEBUG("TEENSY-CS: Configuring low side current sense!");
 
-#ifdef SIMPLEFOC_TEENSY4_ADC_INTERRUPT_DEBUG
+#ifdef TEENSY4_ADC_INTERRUPT_DEBUG
   pinMode(30,OUTPUT);
 #endif
 
@@ -197,7 +197,7 @@ void* _configureADCLowSide(const void* driver_params, const int pinA,const int p
 }
 
 // sync driver and the adc
-void* _driverSyncLowSide(void* driver_params, void* cs_params){
+void _driverSyncLowSide(void* driver_params, void* cs_params){
     Teensy4DriverParams* par = (Teensy4DriverParams*) ((TeensyDriverParams*)driver_params)->additional_params;
     IMXRT_FLEXPWM_t* flexpwm = par->flextimers[0];
     int submodule = par->submodules[0];
@@ -228,7 +228,7 @@ void* _driverSyncLowSide(void* driver_params, void* cs_params){
     // flexpwm->SM[submodule].VAL4 = int(flexpwm->SM[submodule].VAL1*(1.0f - 2.5e-6*par->pwm_frequency))  ; // 2.5us before center 
 
 
-#ifdef SIMPLEFOC_TEENSY4_ADC_INTERRUPT_DEBUG
+#ifdef TEENSY4_ADC_INTERRUPT_DEBUG
     // pin 4 observes out trigger line for 'scope
     xbar_connect (xbar_trig_pwm, XBARA1_OUT_IOMUX_XBAR_INOUT08) ;
     IOMUXC_GPR_GPR6 |= IOMUXC_GPR_GPR6_IOMUXC_XBAR_DIR_SEL_8 ;  // select output mode for INOUT8
@@ -238,11 +238,6 @@ void* _driverSyncLowSide(void* driver_params, void* cs_params){
     IOMUXC_SW_PAD_CTL_PAD_GPIO_EMC_06 = IOMUXC_PAD_DSE(7) | IOMUXC_PAD_SPEED(3) | IOMUXC_PAD_SRE ;
 #endif
 
-  
-  // return the cs parameters 
-  // successfully initialized
-  // TODO verify if success in future
-  return cs_params;
 }
 
 

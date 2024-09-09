@@ -47,7 +47,6 @@ class HallSensor: public Sensor{
     int pinA; //!< HallSensor hardware pin A
     int pinB; //!< HallSensor hardware pin B
     int pinC; //!< HallSensor hardware pin C
-    int use_interrupt; //!< True if interrupts have been attached
 
     // HallSensor configuration
     Pullup pullup; //!< Configuration parameter internal or external pullups

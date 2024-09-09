@@ -38,7 +38,6 @@ void SimpleFOCDebug::println(const __FlashStringHelper* str) {
     }
 }
 
-
 void SimpleFOCDebug::println(const char* str, float val) {
     if (_debugPrint != NULL) {
         _debugPrint->print(str);
@@ -86,20 +85,6 @@ void SimpleFOCDebug::print(const __FlashStringHelper* str) {
         _debugPrint->print(str);
     }
 }
-
-void SimpleFOCDebug::print(const StringSumHelper str) {
-    if (_debugPrint != NULL) {
-        _debugPrint->print(str.c_str());
-    }
-}
-
-
-void SimpleFOCDebug::println(const StringSumHelper str) {
-    if (_debugPrint != NULL) {
-        _debugPrint->println(str.c_str());
-    }
-}
-
 
 
 void SimpleFOCDebug::print(int val) {

@@ -43,7 +43,7 @@ class StepperMotor: public FOCMotor
     StepperDriver* driver; 
 
     /**  Motor hardware init function */
-  	int init() override;
+  	void init() override;
     /** Motor disable function */
   	void disable() override;
     /** Motor enable function */
@@ -89,8 +89,6 @@ class StepperMotor: public FOCMotor
     int alignSensor();
     /** Motor and sensor alignment to the sensors absolute 0 angle  */
     int absoluteZeroSearch();
-    /** Current sense and motor phase alignment */
-    int alignCurrentSense();
         
     // Open loop motion control    
     /**
