@@ -170,13 +170,14 @@ private:
         auto start_time{utime::boot_ts()};              // 记录开始时间
         while (utime::boot_ts() - start_time < timeout) // 最多执行1分钟
         {
-            __target_angle += 20; // 设置目标角度
+            auto curr_angle = __sensor.getAngle();
+            __target_angle = curr_angle + 20; // 设置目标角度
             if (std::abs(__sensor.getAngle() - last_angle) < 0.1)
             {
                 cal_range.second = __sensor.getAngle() - 1.5;
                 goto CALIBRATION_SETP2; // 跳转到阶段2
             }
-            last_angle = __sensor.getAngle(); // 获取当前角度
+            last_angle = curr_angle; // 获取当前角度
             utcollab::Task::sleep_for(utime::to_std_ms(100));
         }
         goto CALIBRATION_TIMEOUT; // 超时跳转
@@ -188,13 +189,14 @@ private:
         __target_angle = cal_range.second - 30;         // 设置目标角度
         while (utime::boot_ts() - start_time < timeout) // 最多执行1分钟
         {
-            __target_angle -= 20; // 设置目标角度
-            if (std::abs(__sensor.getAngle() - last_angle) < 0.1)
+            auto curr_angle = __sensor.getAngle();
+            __target_angle = curr_angle - 20; // 设置目标角度
+            if (std::abs(curr_angle - last_angle) < 0.1)
             {
                 cal_range.first = __sensor.getAngle() + 1.5;
                 goto CALIBRATION_END; // 跳转到阶段3
             }
-            last_angle = __sensor.getAngle(); // 获取当前角度
+            last_angle = curr_angle; // 获取当前角度
             utcollab::Task::sleep_for(utime::to_std_ms(100));
         }
 
