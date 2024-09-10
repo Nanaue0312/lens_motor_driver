@@ -1,6 +1,8 @@
 #include "motor_fun.h"
 #include "crc16.h"
 #include "bsp_internal_flash.h"
+#include "utools.h"
+
 int16_t current_location_save[1] = {0};
 int16_t dataToSave[4] = {0, 0, 0, 0};
 // 最大角度
@@ -24,9 +26,10 @@ BLDCMotor motor = BLDCMotor(7, 10, 180);
 //   - phA   - A phase adc pin
 //   - phB   - B phase adc pin
 //   - phC   - C phase adc pin (optional)
-LowsideCurrentSense current_sense = LowsideCurrentSense(0.01, 11, PA6, PA7, _NC); // when measuring A and B phase currents and not measuring C
+LowsideCurrentSense current_sense = LowsideCurrentSense(0.001, 11, PA6, PA7, PA5); // when measuring A and B phase currents and not measuring C
+// LowsideCurrentSense current_sense = LowsideCurrentSense(0.001, 11, PA6, PA7, _NC); // when measuring A and B phase currents and not measuring C
 
-GenericSensor sensor = GenericSensor(readSensor, initSensor);
+GenericSensor sensor = GenericSensor(kth7812_read_angle, kth7812_init);
 // voltage set point variable
 // Commander command = Commander(Serial);
 // void doTarget(char *cmd) { command.scalar(&target_angle_rec_uart, cmd); }
@@ -35,11 +38,13 @@ GenericSensor sensor = GenericSensor(readSensor, initSensor);
 // instantiate the commander
 void motor_init()
 {
-
     // 传感器初始化
     sensor.init();
+    UTINFO("kth7812 sensor ready.");
+
     // 将电机连接到传感器
     motor.linkSensor(&sensor);
+    UTINFO("motor linked to sensor.");
 
     // 驱动程序配置
     // 重要！
@@ -47,16 +52,32 @@ void motor_init()
     // 电源电压[V]
     // dead_zone [0,1] - default 0.02 - 2%
     driver.voltage_power_supply = 12;
+    driver.voltage_limit = 24;
     driver.pwm_frequency = 20000;
-    driver.init();
+    auto re_dr = driver.init();
+    if (re_dr != 1)
+    {
+        UTERROR("driver init failed. status:", re_dr);
+        return;
+    }
+    UTINFO("driver ready.");
     // link driver
     motor.linkDriver(&driver);
     current_sense.linkDriver(&driver);
-    current_sense.init();
+    auto re_cs = current_sense.init();
+    if (re_cs != 1)
+    {
+        UTERROR("current sense init failed. status:", re_cs);
+        return;
+    }
+    UTINFO("current sense initialized success.");
+    // UTINFO("current sense initialized =", current_sense.initialized);
+    // UTINFO("current sense ready.");
 
     // enable monitoring functionality
     // motor.useMonitoring(Serial);
-    motor.linkCurrentSense(&current_sense);
+    // motor.linkCurrentSense(&current_sense);
+    // UTINFO("motor linked to current sense.");
 
     // set torque mode:
     motor.torque_controller = TorqueControlType::voltage;
@@ -101,7 +122,7 @@ void motor_init()
     motor.phase_resistance = 5;
     motor.modulation_centered = 1.0;
     // use monitoring with serial
-    Serial.begin(115200);
+    // Serial.begin(115200);
     // comment out if not needed
     // motor.useMonitoring(Serial);
 
@@ -118,8 +139,9 @@ void motor_init()
     // add target command T
     // command.add('T', doTarget, "target current");
     // command.add('M', doMotor, "motor control");
-    Serial.println(F("Motor ready."));
-    Serial.println(F("Set the target current using serial terminal:"));
+    // Serial.println(F("Motor ready."));
+    // Serial.println(F("Set the target current using serial terminal:"));
+    UTINFO("Motor ready.");
 
     // TODO:读取EEPROM
     // uint16_t readData[2];
@@ -131,7 +153,7 @@ void motor_init()
     // Serial.println(min_angle);
     _delay(1000);
     byte addr_rvf[] = {0xCC, 0xCD, 0xAA, 0xAA};
-    Serial.write(addr_rvf, 4);
+    UTINFO("send addr: ", utcode::to_hex(addr_rvf, 4));
 }
 float sigmoid(float x, float k)
 {
@@ -143,7 +165,6 @@ float tanh_scale(float x, float k)
 }
 void motor_work(float target_angle_rec, float slope)
 {
-
     // main FOC algorithm function
     motor.loopFOC();
     dataToSave[2] = motor.shaftAngle();
@@ -171,8 +192,8 @@ void motor_work(float target_angle_rec, float slope)
 
 void TaskCalibration(void *pvParameters)
 {
-
-    Serial.println("Start calibration");
+    // Serial.println("Start calibration");
+    UTINFO("Start calibration");
     calibration_flag = true;
     target_angle = 0;
     int last_time = 0;
@@ -202,7 +223,8 @@ void TaskCalibration(void *pvParameters)
                 {
 
                     max_angle = sensor.getAngle() - 1.5;
-                    Serial.println(max_angle);
+                    // Serial.println(max_angle);
+                    UTTRACE("max angle:", max_angle);
                     flag_direction = false;
                     target_angle = max_angle - 30;
                 }
@@ -210,8 +232,8 @@ void TaskCalibration(void *pvParameters)
                 {
 
                     min_angle = sensor.getAngle() + 1.5;
-                    Serial.println(min_angle);
-
+                    // Serial.println(min_angle);
+                    UTTRACE("min angle:", min_angle);
                     motor.velocity_limit = 300;
                     calibrating = true;
                     vTaskDelay(100);
@@ -221,8 +243,7 @@ void TaskCalibration(void *pvParameters)
                     dataToSave[1] = {(int16_t)(min_angle * 100.0f)}; // 将浮点数转换为整数保存
 
                     // FLASH_WriteData(FLASH_SAVE_ADDR, dataToSave, 2);
-
-                    vTaskDelete(NULL);
+                    break;
                 }
             }
             else
@@ -233,6 +254,8 @@ void TaskCalibration(void *pvParameters)
 
         vTaskDelay(25);
     }
+    UTINFO("TaskCalibration exit");
+    vTaskDelete(NULL);
 }
 
 float received_frm_data;
@@ -308,10 +331,8 @@ void TaskRecUart(void *pvParameters)
                 }
             }
         }
-        // Serial.print(min_angle + (received_frm_data * (max_angle - min_angle)));
 
-        // Serial.print(",");
-        // Serial.println(sensor.getAngle());
-        vTaskDelay(5);
+        // UTINFO(sensor.getAngle());  // 串口打印角度
+        utcollab::Task::sleep_for(5);
     }
 }

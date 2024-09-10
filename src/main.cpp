@@ -14,8 +14,6 @@ void setup()
 {
     // sys_nvic_set_vector_table(FLASH_BASE, 0x4000);
     Serial.begin(115200);
-    utlog::bind_print(static_cast<size_t (HardwareSerial::*)(const char[])>(&HardwareSerial::print), &Serial);
-    utlog::set_log_level_all(true);
 
     motor_init();
     PVD_config();
@@ -23,9 +21,7 @@ void setup()
     UTINFO("max_angle:", max_angle, "\tmin_angle:", min_angle, "\tcurrent_angle:", current_angle);
 
     // motor.sensor_offset = current_angle;
-    // xTaskCreate(TaskCalibration, (const portCHAR *)"Calibration", 128, NULL, 1, NULL);
-    // xTaskCreate(TaskRecUart, (const portCHAR *)"RecUart", 1024, NULL, 1, NULL);
-    utcollab::Task(TaskCalibration, nullptr).detach(128);
+    utcollab::Task(TaskCalibration, nullptr).detach(1204);
     utcollab::Task(TaskRecUart, nullptr).detach(1024);
 
     UTINFO("Starting scheduler");
@@ -39,6 +35,8 @@ void loop()
 {
     // motor_work(target_angle_rec_uart);
     motor_work(received_frm_data, fabs(received_slope_f));
+    // utcollab::Task::sleep_for(10);
+    // UTINFO("loop");
 }
 
 /// @brief 设置系统 NVIC 向量表的位置

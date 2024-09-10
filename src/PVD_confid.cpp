@@ -41,11 +41,11 @@ void PVD_config(void)
     HAL_FLASHEx_Erase(&FLASH_Init, &PageError);
     if (HAL_FLASHEx_Erase(&FLASH_Init, &PageError) != HAL_OK)
     {
-        Serial.println("Flash erase failed!");
+        // Serial.println("Flash erase failed!");
     }
     else
     {
-        Serial.println("Flash erase success!");
+        // Serial.println("Flash erase success!");
     }
 }
 extern "C"
@@ -53,7 +53,7 @@ extern "C"
     void PVD_IRQHandler()
     {
         FLASH_WriteData_PVD(FLASH_SAVE_ADDR, dataToSave, sizeof(dataToSave) / sizeof(uint16_t));
-        Serial.print("pvd");
+        // Serial.print("pvd");
 
         /* USER CODE END PVD_IRQn 0 */
         HAL_PWR_PVD_IRQHandler();
