@@ -1,3 +1,6 @@
 [submodule "lib/utools"]
 	path = lib/utools
 	url = https://gitee.com/lyworkspace/utools.git
+[submodule "lib/ukeypad"]
+	path = lib/ukeypad
+	url = https://gitee.com/lyworkspace/ukeypad.git
