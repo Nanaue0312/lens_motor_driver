@@ -63,6 +63,7 @@ void motor_init()
     UTINFO("driver ready.");
     // link driver
     motor.linkDriver(&driver);
+
     current_sense.linkDriver(&driver);
     auto re_cs = current_sense.init();
     if (re_cs != 1)
@@ -71,13 +72,11 @@ void motor_init()
         return;
     }
     UTINFO("current sense initialized success.");
-    // UTINFO("current sense initialized =", current_sense.initialized);
-    // UTINFO("current sense ready.");
 
     // enable monitoring functionality
     // motor.useMonitoring(Serial);
-    // motor.linkCurrentSense(&current_sense);
-    // UTINFO("motor linked to current sense.");
+    motor.linkCurrentSense(&current_sense);
+    UTINFO("motor linked to current sense.");
 
     // set torque mode:
     motor.torque_controller = TorqueControlType::voltage;
