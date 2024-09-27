@@ -127,10 +127,34 @@ public:
 
     /// @brief 运动到目标角度
     /// @note 调用频率大于1kHz
-    inline void handle_loop()
+    inline void handle()
     {
+        static float last_angle{__target_angle};
         __motor.loopFOC();
-        __motor.move(__target_angle);
+        if (utmath::is_close_abs(last_angle, __target_angle, 0.000001f))
+        {
+            __motor.move(__target_angle);
+            last_angle = __target_angle;
+        }
+    }
+
+    /// @brief 运行主循环
+    /// @note 调用频率大于1kHz
+    /// @warning 调用后会在此处阻塞，直到程序结束，请让此函数在单独的线程中运行
+    void run_forever()
+    {
+        static bool first_run{true};
+        if (!first_run)
+        {
+            UTWARN("motor driver already run.");
+            return;
+        }
+        first_run = false;
+        UTINFO("motor driver run forever.");
+        while (true)
+        {
+            handle();
+        }
     }
 
 private:
@@ -178,7 +202,7 @@ private:
                 goto CALIBRATION_SETP2; // 跳转到阶段2
             }
             last_angle = curr_angle; // 获取当前角度
-            utcollab::Task::sleep_for(utime::to_std_ms(100));
+            utcollab::Task::sleep_for(100);
         }
         goto CALIBRATION_TIMEOUT; // 超时跳转
 
@@ -197,7 +221,7 @@ private:
                 goto CALIBRATION_END; // 跳转到阶段3
             }
             last_angle = curr_angle; // 获取当前角度
-            utcollab::Task::sleep_for(utime::to_std_ms(100));
+            utcollab::Task::sleep_for(100);
         }
 
         // 校准出现超时
