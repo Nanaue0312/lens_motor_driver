@@ -1,0 +1,105 @@
+#ifndef __UTOOLS_ABOUT_MANG_DEF_H__
+#define __UTOOLS_ABOUT_MANG_DEF_H__
+
+#include "utools_cfg.h"
+
+#ifdef UTOOLS_ABOUT_INCLUDE
+#include UTOOLS_ABOUT_INCLUDE
+#endif
+
+// 产品名称
+#ifndef UTOOLS_VERSION_MANG_NAME
+#define UTOOLS_VERSION_MANG_NAME "utools"
+#endif
+
+// CPU型号
+#ifndef UTOOLS_VERSION_MANG_CPU
+#define UTOOLS_VERSION_MANG_CPU "ESP32-S3"
+#endif
+
+// CPU架构
+#ifndef UTOOLS_VERSION_MANG_ARCH
+#define UTOOLS_VERSION_MANG_ARCH "RISCV"
+#endif
+
+// ARM大小
+#ifndef UTOOLS_VERSION_MANG_ARM
+#define UTOOLS_VERSION_MANG_ARM "320kB"
+#endif
+
+// 操作系统
+#ifndef UTOOLS_VERSION_MANG_OS
+#define UTOOLS_VERSION_MANG_OS "FreeRTOS V8.4.3"
+#endif
+
+// 编译器
+#ifndef UTOOLS_VERSION_MANG_COMPILER
+#define UTOOLS_VERSION_MANG_COMPILER "ESP-IDF"
+#endif
+
+// 主版本号
+#ifndef UTOOLS_VERSION_MANG_MAJOR
+#define UTOOLS_VERSION_MANG_MAJOR 1
+#endif
+
+// 次版本号
+#ifndef UTOOLS_VERSION_MANG_MINOR
+#define UTOOLS_VERSION_MANG_MINOR 0
+#endif
+
+// 修订号
+#ifndef UTOOLS_VERSION_MANG_PATCH
+#define UTOOLS_VERSION_MANG_PATCH 0
+#endif
+
+// 描述信息
+#ifndef UTOOLS_VERSION_MANG_DESC
+#define UTOOLS_VERSION_MANG_DESC "versatile"
+#endif
+
+// 作者
+#ifndef UTOOLS_VERSION_MANG_AUTHOR
+#define UTOOLS_VERSION_MANG_AUTHOR "Wooden Heart Bird"
+#endif
+
+// 公司
+#ifndef UTOOLS_VERSION_MANG_COMPANY
+#define UTOOLS_VERSION_MANG_COMPANY "Versatile Lim.td."
+#endif
+
+// 网址
+#ifndef UTOOLS_VERSION_MANG_URL
+#define UTOOLS_VERSION_MANG_URL "http://ver.cn"
+#endif
+
+// 版权信息
+#ifndef UTOOLS_VERSION_MANG_COPYRIGHT
+#define UTOOLS_VERSION_MANG_COPYRIGHT "Copyright © 1998 - 2024 Versatile. All Rights Reserved."
+#endif
+
+// 作者邮箱
+#ifndef UTOOLS_VERSION_MANG_AUTHOR_EMAIL
+#define UTOOLS_VERSION_MANG_AUTHOR_EMAIL "lingeasy@126.com"
+#endif
+
+// 许可证
+#ifndef UTOOLS_VERSION_MANG_LICENSE
+#define UTOOLS_VERSION_MANG_LICENSE "MIT"
+#endif
+
+// 硬件识别码
+#ifndef UTOOLS_VERSION_MANG_HARDWARE_ID
+#define UTOOLS_VERSION_MANG_HARDWARE_ID "0000000000000000"
+#endif
+
+// 软件识别码
+#ifndef UTOOLS_VERSION_MANG_SOFTWARE_ID
+#define UTOOLS_VERSION_MANG_SOFTWARE_ID "0000000000000000"
+#endif
+
+// 系统识别码，独立于硬件和软件识别，可以任务是是硬件和软件的指纹
+#ifndef UTOOLS_VERSION_MANG_IDENTIFY
+#define UTOOLS_VERSION_MANG_IDENTIFY "0000000000000000"
+#endif
+
+#endif // __UTOOLS_ABOUT_MANG_DEF_H__

@@ -1,0 +1,223 @@
+{
+	"archive" : {},
+	"artifacts" : 
+	[
+		{
+			"path" : "lib/utools/libutools_lib.a"
+		}
+	],
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_library",
+			"include_directories"
+		],
+		"files" : 
+		[
+			"lib/utools/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 26,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 4,
+				"parent" : 0
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : " -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard  -Wall -Wextra -Wpedantic -fdata-sections -ffunction-sections -O0 -g3 -fno-rtti -fno-exceptions -fno-threadsafe-statics -g"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 2,
+					"path" : "E:/WorkSpace_VSCode/STM32/lens_motor_driver/lib/utools/src"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "E:/WorkSpace_VSCode/STM32/lens_motor_driver/lib/utools/src/ring_buffer"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "E:/WorkSpace_VSCode/STM32/lens_motor_driver/lib/utools/src/umempool"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "E:/WorkSpace_VSCode/STM32/lens_motor_driver/lib/utools/src/coded"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "E:/WorkSpace_VSCode/STM32/lens_motor_driver/lib/utools/src/logger"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "E:/WorkSpace_VSCode/STM32/lens_motor_driver/lib/utools/src/utime"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "E:/WorkSpace_VSCode/STM32/lens_motor_driver/lib/utools/src/ufmt"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "E:/WorkSpace_VSCode/STM32/lens_motor_driver/lib/utools/src/collab"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "E:/WorkSpace_VSCode/STM32/lens_motor_driver/lib/utools/src/umath"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "E:/WorkSpace_VSCode/STM32/lens_motor_driver/lib/utools/src/fliter"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "E:/WorkSpace_VSCode/STM32/lens_motor_driver/lib/utools/src/uthread_pool"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "E:/WorkSpace_VSCode/STM32/lens_motor_driver/lib/utools/src/about_mang"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "E:/WorkSpace_VSCode/STM32/lens_motor_driver/lib/utools/src/any_store"
+				},
+				{
+					"backtrace" : 2,
+					"path" : "E:/WorkSpace_VSCode/STM32/lens_motor_driver/lib/utools/src/pattern"
+				}
+			],
+			"language" : "CXX",
+			"sourceIndexes" : 
+			[
+				0,
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10
+			]
+		}
+	],
+	"id" : "utools_lib::@2bb39d54666cda960f90",
+	"name" : "utools_lib",
+	"nameOnDisk" : "libutools_lib.a",
+	"paths" : 
+	{
+		"build" : "lib/utools",
+		"source" : "lib/utools"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Source Files",
+			"sourceIndexes" : 
+			[
+				0,
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "lib/utools/src/about_mang/about_mang.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "lib/utools/src/coded/base64.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "lib/utools/src/coded/crc.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "lib/utools/src/coded/endian.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "lib/utools/src/coded/hexstr.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "lib/utools/src/coded/md5.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "lib/utools/src/coded/sha1.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "lib/utools/src/logger/logger.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "lib/utools/src/ufmt/f_string.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "lib/utools/src/umempool/mempool_ipml.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "lib/utools/src/utime/time_configurator.cpp",
+			"sourceGroupIndex" : 0
+		}
+	],
+	"type" : "STATIC_LIBRARY"
+}
