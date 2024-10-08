@@ -15,6 +15,11 @@ void setup()
     UTINFO("CtrlMang Starting...");
     CtrlMang::instance().begin();
     // CtrlMang::instance().set_device_state(DeviceState::PAIRING);
+    if (1){
+        CtrlMang::instance().set_device_state(DeviceState::RUNNING);
+    }else{
+        CtrlMang::instance().set_device_state(DeviceState::ERROR);    
+    }
 
     // FMotorDriver::instance().calibration();
     UTINFO("Follow Focus Motor Started.");
