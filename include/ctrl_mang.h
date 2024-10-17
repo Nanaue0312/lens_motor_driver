@@ -275,14 +275,7 @@ private:
                 break;
             case Keyboard::Event::PRESSED:
                  // 处理按下事件
-                // if (device_state == DeviceState::PAIRING) {
-                //     // 设备状态：PAIRING -> RUNNING
-                //     new_device_state = DeviceState::RUNNING;
-                // } else if (device_state == DeviceState::ERROR) {
-                //     // 设备状态：ERROR -> INIT
-                //     new_device_state = DeviceState::INIT;
-                // }
-                // UTDEBUG("Shift pressed");
+                UTDEBUG("Shift pressed");
                 break;
             case Keyboard::Event::DOUBLE_CLICK:
                 // TODO: 处理双击事件
