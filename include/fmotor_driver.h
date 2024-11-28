@@ -58,23 +58,24 @@ public:
     // __motor.PID_velocity.P = 0.3;
     // __motor.PID_velocity.I = 0.3;
     // __motor.PID_velocity.D = 0.001;
-    __motor.PID_velocity.P = 0.2;
-    __motor.PID_velocity.I = 0.15;
-    __motor.PID_velocity.D = 0.003;
-    __motor.PID_velocity.output_ramp = 1000.0;
+    // todo 调整还是存在卡顿
+    __motor.PID_velocity.P = 0.01;
+    __motor.PID_velocity.I = 0.003;
+    __motor.PID_velocity.D = 0.0;
+    __motor.PID_velocity.output_ramp = 300.0;
     __motor.PID_velocity.limit = 1.5;
     // Low pass filtering time constant
     __motor.LPF_velocity.Tf = 0.2;
 
     // angle loop PID
-    __motor.P_angle = angle_pid_0;
-    // __motor.P_angle.P = 4.5;
-    // __motor.P_angle.I = 1;
-    // __motor.P_angle.D = 0;
-    // __motor.P_angle.output_ramp = 10000.0;
-    // __motor.P_angle.limit = 100.0;
+    // __motor.P_angle = angle_pid_0;
+    __motor.P_angle.P = 5.0;
+    __motor.P_angle.I = 0.1;
+    __motor.P_angle.D = 0;
+    __motor.P_angle.output_ramp = 1000.0;
+    __motor.P_angle.limit = 150.0;
     // // Low pass filtering time constant
-    __motor.LPF_angle.Tf = 0.05;
+    __motor.LPF_angle.Tf = 0.1;
 
     // setting the limits
     // maximal velocity of the position control
@@ -127,11 +128,10 @@ public:
   /// @brief 运动到目标角度
   /// @note 调用频率大于1kHz
   inline void handle() {
-    static float last_angle{__target_angle};
+    // static float last_angle{__target_angle};
     __motor.loopFOC();
-    __target_angle = __motor.target;
+    // __target_angle = __motor.target;
     __motor.move(__target_angle);
-    static float blend_factor = 0.0f; // 初始过渡比例为0，逐步增加
 
     // if (utmath::is_close_abs(__motor.shaft_angle, __target_angle, 0.008f)) {
     //     if (blend_factor > 0.0f) {
@@ -156,9 +156,9 @@ public:
     //     __motor.P_angle.D = (1.0f - blend_factor) * __motor.P_angle.D +
     //                         blend_factor * angle_pid_60.D;
     // }
-    if (utmath::is_close_abs(__motor.shaft_angle, __target_angle, 0.01f)) {
-      last_angle = __target_angle;
-    }
+    // if (utmath::is_close_abs(__motor.shaft_angle, __target_angle, 0.01f)) {
+    //   last_angle = __target_angle;
+    // }
   }
 
   /// @brief 运行主循环
@@ -166,6 +166,10 @@ public:
   /// @warning 调用后会在此处阻塞，直到程序结束，请让此函数在单独的线程中运行
   void run_forever() {
     static bool first_run{true};
+    std::string rx_str;
+    float target_angle = 0;
+    static float last_target_angle = 0.0f;
+    bool move_flag{false};
     if (!first_run) {
       UTWARN("motor driver already run.");
       return;
@@ -173,23 +177,44 @@ public:
     first_run = false;
     UTINFO("motor driver run forever.");
     while (true) {
+      // 通讯板的串口通讯
+      size_t rx_len{0};
+      while (Serial.available() > 11 && !move_flag) {
+        move_flag = true;
+        rx_str = Serial.readStringUntil('\n').c_str();
+        rx_len = rx_str.size();
+      }
+      if (rx_len > 0) {
+        // 数据格式：T+数据，如T100.0000
+        if (std::isdigit(rx_str[1])) {
+          float target_angle = std::stof(rx_str.substr(1));
+          set_target_normalized_position(target_angle);
+          last_target_angle = target_angle;
+        } else if (rx_str[1] == '-') {
+          set_target_normalized_position(1);
+          last_target_angle = 1;
+        }
+        rx_len = 0;
+      }
       handle();
-      __motor.monitor();
-      command.run();
+      move_flag = false;
+      // 调试部分
+      // __motor.monitor();
+      // __command.run();
     }
   }
   /// @brief 初始化commander和monitor，用于simple foc studio 调参
   /// @param serial
   void monitor_init(HardwareSerial &serial) {
-    command = Commander(serial);
-    command.add('M', doMotor, "motor");
-    command.add('T', doTarget, "motor target");
+    __command = Commander(serial);
+    __command.add('M', doMotor, "motor");
+    __command.add('T', doTarget, "motor target");
     __motor.useMonitoring(serial);
     __motor.monitor_downsample = 100;
   }
 
   BLDCMotor &get_motor() { return __motor; }
-  Commander &get_command() { return command; }
+  Commander &get_command() { return __command; }
   void set_target(float target) { __target_angle = target; }
   float *get_target() { return &__target_angle; }
 
@@ -210,16 +235,9 @@ private:
   // LowsideCurrentSense构造函数
   LowsideCurrentSense __current_sense{0.001, 11, PA6, PA7, PA5};
   GenericSensor __sensor{kth7812_read_angle, kth7812_init};
-  Commander command;
-  // 初始PID参数，用于前60%部分的调整
-  // PIDController angle_pid_0{5.5f, 1.0f, 0.0f, 10000.0f, 150.0f};
-  // todo 如果两个参数i值相差太大在回退时会存在阶跃
-  // <15.08 上升曲线存在跳跃，下降曲线平滑
-  // 15.08 使用插值动态调整pid参数，平滑，但会过冲，调整不明显
-  // PIDController angle_pid_0{2.5f, 0.5f, 0.0f, 10000.0f, 150.0f};
+  Commander __command;
   PIDController angle_pid_0{10.0f, 0.1f, 0.0f, 10000.0f, 150.0f};
-  // PIDController angle_pid_60{3.0f, 3.0f, 0.2f, 10000.0f, 150.0f};
-  PIDController angle_pid_60{8.0f, 0.4f, 0.0f, 10000.0f, 150.0f};
+  // PIDController angle_pid_60{8.0f, 0.4f, 0.0f, 10000.0f, 150.0f};
   // 判断是否切换pid
   bool pid_switched = false;
   /// @brief 检测当前位置是否大于误差
@@ -230,13 +248,13 @@ private:
   /// @param percent 百分比小鼠
   /// @return true 超过百分比
   /// @return false 没超过百分比
-  bool is_out_percent(float start, float target, float cur, float percent) {
-    if (target < start) {
-      return cur < (start + (target - start) * percent);
-    } else {
-      return cur > (start + (target - start) * percent);
-    }
-  }
+  /*   bool is_out_percent(float start, float target, float cur, float percent)
+    { if (target < start) { return cur < (start + (target - start) * percent);
+      } else {
+        return cur > (start + (target - start) * percent);
+      }
+    } */
+
   bool __calibrating_flag{false}; // 正校准标志位
 
   /// @brief 校准电机

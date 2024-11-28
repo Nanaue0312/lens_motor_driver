@@ -16,7 +16,7 @@ void setup() {
     CtrlMang::instance().set_device_state(DeviceState::ERROR);
   }
 
-  FMotorDriver::instance().monitor_init(Serial);
+  // FMotorDriver::instance().monitor_init(Serial);
   // PVD_config();
 
   UTINFO("CtrlMang Starting...");
@@ -25,7 +25,6 @@ void setup() {
 
   // FMotorDriver::instance().calibration();
   UTINFO("Follow Focus Motor Started.");
-
   utcollab::Task(&FMotorDriver::run_forever, &FMotorDriver::instance())
       .detach();
 
