@@ -60,7 +60,7 @@ public:
     // __motor.PID_velocity.D = 0.001;
     // todo 调整还是存在卡顿
     __motor.PID_velocity.P = 0.01;
-    __motor.PID_velocity.I = 0.003;
+    __motor.PID_velocity.I = 0.03;
     __motor.PID_velocity.D = 0.0;
     __motor.PID_velocity.output_ramp = 300.0;
     __motor.PID_velocity.limit = 1.5;
@@ -179,9 +179,9 @@ public:
     while (true) {
       // 通讯板的串口通讯
       size_t rx_len{0};
-      while (Serial.available() > 11 && !move_flag) {
+      while (Serial1.available() > 8 && !move_flag) {
         move_flag = true;
-        rx_str = Serial.readStringUntil('\n').c_str();
+        rx_str = Serial1.readStringUntil('\n').c_str();
         rx_len = rx_str.size();
       }
       if (rx_len > 0) {
