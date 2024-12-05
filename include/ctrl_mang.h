@@ -20,7 +20,7 @@
 /// @brief 设备的状态
 enum class DeviceState
 {
-    NONE,       // 未初始化
+    NONE,        // 未初始化
     INIT,        // 初始化中
     PAIRING,     // 配对中
     CALIBRATION, // 校准中
@@ -80,6 +80,10 @@ public:
 
     /// @brief 电机功能模式
     MotorFuncMode motor_func_mode{MotorFuncMode::FOCUS};
+    MotorFuncMode get_motor_func_mode() const
+    {
+        return motor_func_mode;
+    }
 
     /// @brief 设置设备的状态
     /// @param state 设备状态
@@ -90,25 +94,25 @@ public:
             device_state = state;
             switch (state)
             {
-                case DeviceState::INIT:
-                    utcollab::Task(&CtrlMang::__state_led_init, this).detach(1024,0,4,-1);
-                    break;
-                case DeviceState::PAIRING:
-                    utcollab::Task(&CtrlMang::__state_led_pairing, this).detach(1024,0,4,-1);
-                    break;
-                case DeviceState::CALIBRATION:
-                    utcollab::Task(&CtrlMang::__state_led_calibration, this).detach(1024,0,4,-1);
-                    break;
-                case DeviceState::RUNNING:
-                    // __state_led_running();
-                    utcollab::Task(&CtrlMang::__state_led_running, this).detach(1024,0,4,-1);
-                    break;
-                case DeviceState::ERROR:
-                    // __state_led_error();
-                    utcollab::Task(&CtrlMang::__state_led_error, this).detach(1024,0,4,-1);
-                    break;
-                default:
-                    break;
+            case DeviceState::INIT:
+                utcollab::Task(&CtrlMang::__state_led_init, this).detach(1024, 0, 4, -1);
+                break;
+            case DeviceState::PAIRING:
+                utcollab::Task(&CtrlMang::__state_led_pairing, this).detach(1024, 0, 4, -1);
+                break;
+            case DeviceState::CALIBRATION:
+                utcollab::Task(&CtrlMang::__state_led_calibration, this).detach(1024, 0, 4, -1);
+                break;
+            case DeviceState::RUNNING:
+                // __state_led_running();
+                utcollab::Task(&CtrlMang::__state_led_running, this).detach(1024, 0, 4, -1);
+                break;
+            case DeviceState::ERROR:
+                // __state_led_error();
+                utcollab::Task(&CtrlMang::__state_led_error, this).detach(1024, 0, 4, -1);
+                break;
+            default:
+                break;
             }
         }
     }
@@ -144,7 +148,6 @@ private:
             }
             utcollab::Task::sleep_for(500);
         }
-       
     }
 
     /// @brief 配对状态的led显示
@@ -209,7 +212,7 @@ private:
     /// @brief 运行状态的led显示
     void __state_led_running()
     {
-        while (device_state==DeviceState::RUNNING)
+        while (device_state == DeviceState::RUNNING)
         {
             switch (motor_func_mode)
             {
@@ -266,15 +269,15 @@ private:
         if (key_id == KEY_SHIFT)
         {
             DeviceState new_device_state = device_state;
-            static uint8_t count_running = 0,count_calibration = 0,count_pairing = 0;
+            static uint8_t count_running = 0, count_calibration = 0, count_pairing = 0;
             switch (event)
             {
             case Keyboard::Event::LONG_PRESS:
-                 // 处理长按事件
+                // 处理长按事件
                 // UTDEBUG("Shift long press");
                 break;
             case Keyboard::Event::PRESSED:
-                 // 处理按下事件
+                // 处理按下事件
                 UTDEBUG("Shift pressed");
                 break;
             case Keyboard::Event::DOUBLE_CLICK:
@@ -282,19 +285,27 @@ private:
                 // UTDEBUG("Shift double click");
                 break;
             case Keyboard::Event::RELEASED:
-                 // 处理释放事件
-                if (device_state == DeviceState::RUNNING) {
-                    if (count_running>=3) {
+                // 处理释放事件
+                if (device_state == DeviceState::RUNNING)
+                {
+                    if (count_running >= 3)
+                    {
                         // 设备状态：RUNNING -> PAIRING (>3s)
                         new_device_state = DeviceState::PAIRING;
-                    } else if (count_running >= 1) {
+                    }
+                    else if (count_running >= 1)
+                    {
                         // 设备状态：RUNNING -> CALIBRATION (>1s)
                         new_device_state = DeviceState::CALIBRATION;
                     }
-                } else if (device_state== DeviceState::CALIBRATION && count_calibration>=1) {
+                }
+                else if (device_state == DeviceState::CALIBRATION && count_calibration >= 1)
+                {
                     // 设备状态：CALIBRATION -> RUNNING (>1s)
                     new_device_state = DeviceState::RUNNING;
-                } else if (device_state== DeviceState::PAIRING && count_pairing>=3) {
+                }
+                else if (device_state == DeviceState::PAIRING && count_pairing >= 3)
+                {
                     // 设备状态：PAIRING -> RUNNING (>3s)
                     new_device_state = DeviceState::RUNNING;
                 }
@@ -306,11 +317,16 @@ private:
             case Keyboard::Event::PERIOD_TRIGGER:
                 // TODO: 处理周期触发事件
                 // 记录长按时间，在释放时处理
-                if (device_state == DeviceState::RUNNING) {
+                if (device_state == DeviceState::RUNNING)
+                {
                     count_running++;
-                } else if (device_state == DeviceState::CALIBRATION) {
+                }
+                else if (device_state == DeviceState::CALIBRATION)
+                {
                     count_calibration++;
-                } else if (device_state == DeviceState::PAIRING) {
+                }
+                else if (device_state == DeviceState::PAIRING)
+                {
                     count_pairing++;
                 }
                 UTDEBUG("Shift period trigger");

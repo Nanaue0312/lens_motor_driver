@@ -198,20 +198,6 @@ public:
         rx_str = Serial.readStringUntil('\n').c_str();
         rx_len = rx_str.length();
       }
-      // if (rx_len > 0)
-      // {
-      // 数据格式：T+数据，如T100.0000
-      // if (std::isdigit(rx_str[1]))
-      // {
-      //   float target_angle = std::stof(rx_str.substr(1));
-      //   set_target_normalized_position(target_angle);
-      //   last_target_angle = target_angle;
-      // }
-      // else if (rx_str[1] == '-')
-      // {
-      //   set_target_normalized_position(1);
-      //   last_target_angle = 1;
-      // }
       if (rx_len > 0)
       {
 
@@ -234,10 +220,10 @@ public:
           }
           else if (current_mode == MotorFuncMode::IRIS)
           {
-            // 提取 iris
-            String irisStr = rx_str.substring(irisIndex + 1, rx_str.length() - 2); // -2 为去掉 CRC 和空格
-            float iris = irisStr.toFloat();
-            target_angle = iris; // 转换为 float
+              // 提取 iris
+              String irisStr = rx_str.substring(irisIndex + 1, rx_str.length() - 2); // -2 为去掉 CRC 和空格
+              float iris = irisStr.toFloat();
+              target_angle = iris; // 转换为 float
           }
           else if (current_mode == MotorFuncMode::FOCUS)
           {
