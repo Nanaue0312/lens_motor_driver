@@ -6,7 +6,12 @@
 void setup() {
   // sys_nvic_set_vector_table(FLASH_BASE, 0x4000);
   Serial.begin(115200);
-
+  auto print_func = [](const char *message)
+  {
+    Serial.print(message);
+  };
+  utlog::bind_print(print_func);
+  utlog::start_async(512);
   UTINFO("Follow Focus Motor Starting...");
   bool device_is_ok = FMotorDriver::instance().begin();
   CtrlMang::instance().begin();
@@ -25,8 +30,7 @@ void setup() {
 
   // FMotorDriver::instance().calibration();
   UTINFO("Follow Focus Motor Started.");
-  utcollab::Task(&FMotorDriver::run_forever, &FMotorDriver::instance())
-      .detach();
+  utcollab::Task(&FMotorDriver::run_forever, &FMotorDriver::instance()).detach();
 
   vTaskStartScheduler();
 

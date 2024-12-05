@@ -142,7 +142,7 @@ private:
             default:
                 break;
             }
-            utcollab::Task::sleep(500);
+            utcollab::Task::sleep_for(500);
         }
        
     }
@@ -177,7 +177,7 @@ private:
                 step = 1;
                 break;
             }
-            utcollab::Task::sleep(350);
+            utcollab::Task::sleep_for(350);
         }
     }
 
@@ -202,7 +202,7 @@ private:
         while (device_state == DeviceState::CALIBRATION)
         {
             state_led->toggle();
-            utcollab::Task::sleep(500);
+            utcollab::Task::sleep_for(500);
         }
     }
 
@@ -231,7 +231,7 @@ private:
             default:
                 break;
             }
-            utcollab::Task::sleep(500);
+            utcollab::Task::sleep_for(500);
         }
     }
 
@@ -243,7 +243,7 @@ private:
             state_led1.on();
             state_led2.on();
             state_led3.on();
-            utcollab::Task::sleep(500);
+            utcollab::Task::sleep_for(500);
         }
     }
 

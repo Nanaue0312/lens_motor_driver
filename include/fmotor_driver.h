@@ -7,9 +7,11 @@
 
 void doMotor(char *cmd);
 void doTarget(char *cmd);
-class FMotorDriver : public utpattern::Singleton<FMotorDriver> {
+class FMotorDriver : public utpattern::Singleton<FMotorDriver>
+{
 public:
-  FMotorDriver() {
+  FMotorDriver()
+  {
     // 1 位置检测传感器初始化
     __sensor.init();
     UTINFO("kth7812 sensor ready.");
@@ -21,7 +23,8 @@ public:
     __driver.voltage_limit = 24;
     __driver.pwm_frequency = 20000;
     auto re_dr = __driver.init();
-    if (re_dr != 1) {
+    if (re_dr != 1)
+    {
       UTERROR("driver init failed. status:", re_dr);
       return;
     }
@@ -31,7 +34,8 @@ public:
     // 3 电流检测传感器初始化
     __current_sense.linkDriver(&__driver);
     auto re_cs = __current_sense.init();
-    if (re_cs != 1) {
+    if (re_cs != 1)
+    {
       UTERROR("current sense init failed. status:", re_cs);
       return;
     }
@@ -89,7 +93,8 @@ public:
 
   virtual ~FMotorDriver() = default;
 
-  bool begin() {
+  bool begin()
+  {
     __motor.init();
     auto re{__motor.initFOC()};
     UTINFO("Motor ready.");
@@ -97,8 +102,10 @@ public:
   }
 
   /// @brief 启动电机校准
-  void calibration() {
-    if (__calibrating_flag) {
+  void calibration()
+  {
+    if (__calibrating_flag)
+    {
       UTINFO("Motor is already calibrating.");
       return;
     }
@@ -109,7 +116,8 @@ public:
   /// @brief 设定目标角度
   /// @param angle 目标角度
   /// @return 目标角度
-  inline float set_target_angle(float angle) {
+  inline float set_target_angle(float angle)
+  {
     __target_angle =
         utmath::clamp(angle, __angle_range.first, __angle_range.second);
     return __target_angle;
@@ -118,7 +126,8 @@ public:
   /// @brief 运动到归一化位置，会自动映射到真实位置
   /// @param normalized_position [0, 1.0]，归一化位置
   /// @return 真实映射的位置值
-  inline float set_target_normalized_position(float normalized_position) {
+  inline float set_target_normalized_position(float normalized_position)
+  {
     __target_angle =
         utmath::linear_map(normalized_position, 0.0, 1.0, __angle_range.first,
                            __angle_range.second);
@@ -127,7 +136,8 @@ public:
 
   /// @brief 运动到目标角度
   /// @note 调用频率大于1kHz
-  inline void handle() {
+  inline void handle()
+  {
     // static float last_angle{__target_angle};
     __motor.loopFOC();
     // __target_angle = __motor.target;
@@ -164,36 +174,82 @@ public:
   /// @brief 运行主循环
   /// @note 调用频率大于1kHz
   /// @warning 调用后会在此处阻塞，直到程序结束，请让此函数在单独的线程中运行
-  void run_forever() {
+  void run_forever()
+  {
     static bool first_run{true};
-    std::string rx_str;
+    String rx_str;
     float target_angle = 0;
     static float last_target_angle = 0.0f;
     bool move_flag{false};
-    if (!first_run) {
+    if (!first_run)
+    {
       UTWARN("motor driver already run.");
       return;
     }
     first_run = false;
     UTINFO("motor driver run forever.");
-    while (true) {
+    while (true)
+    {
       // 通讯板的串口通讯
       size_t rx_len{0};
-      while (Serial1.available() > 8 && !move_flag) {
+      while (Serial.available() > 8 && !move_flag)
+      {
         move_flag = true;
-        rx_str = Serial1.readStringUntil('\n').c_str();
-        rx_len = rx_str.size();
+        rx_str = Serial.readStringUntil('\n').c_str();
+        rx_len = rx_str.length();
       }
-      if (rx_len > 0) {
-        // 数据格式：T+数据，如T100.0000
-        if (std::isdigit(rx_str[1])) {
-          float target_angle = std::stof(rx_str.substr(1));
+      // if (rx_len > 0)
+      // {
+      // 数据格式：T+数据，如T100.0000
+      // if (std::isdigit(rx_str[1]))
+      // {
+      //   float target_angle = std::stof(rx_str.substr(1));
+      //   set_target_normalized_position(target_angle);
+      //   last_target_angle = target_angle;
+      // }
+      // else if (rx_str[1] == '-')
+      // {
+      //   set_target_normalized_position(1);
+      //   last_target_angle = 1;
+      // }
+      if (rx_len > 0)
+      {
+
+        // 找到并解析 zoom、focus 和 iris
+        int zoomIndex = rx_str.indexOf("Z");
+        int focusIndex = rx_str.indexOf("F");
+        int irisIndex = rx_str.indexOf("I");
+
+        if (zoomIndex != -1 && focusIndex != -1 && irisIndex != -1)
+        {
+          MotorFuncMode current_mode = CtrlMang::instance().get_motor_func_mode();
+          UTDEBUG("current mode: ", current_mode);
+          float target_angle;
+          if (current_mode == MotorFuncMode::ZOOM)
+          {
+            // 提取 zoom
+            String zoomStr = rx_str.substring(zoomIndex + 1, focusIndex - 1);
+            float zoom = zoomStr.toFloat(); // 转换为 float
+            target_angle = zoom;
+          }
+          else if (current_mode == MotorFuncMode::IRIS)
+          {
+            // 提取 iris
+            String irisStr = rx_str.substring(irisIndex + 1, rx_str.length() - 2); // -2 为去掉 CRC 和空格
+            float iris = irisStr.toFloat();
+            target_angle = iris; // 转换为 float
+          }
+          else if (current_mode == MotorFuncMode::FOCUS)
+          {
+            // 提取 focus
+            String focusStr = rx_str.substring(focusIndex + 1, irisIndex - 1);
+            float focus = focusStr.toFloat(); // 转换为 float
+            target_angle = focus;
+          }
           set_target_normalized_position(target_angle);
           last_target_angle = target_angle;
-        } else if (rx_str[1] == '-') {
-          set_target_normalized_position(1);
-          last_target_angle = 1;
         }
+
         rx_len = 0;
       }
       handle();
@@ -205,7 +261,8 @@ public:
   }
   /// @brief 初始化commander和monitor，用于simple foc studio 调参
   /// @param serial
-  void monitor_init(HardwareSerial &serial) {
+  void monitor_init(HardwareSerial &serial)
+  {
     __command = Commander(serial);
     __command.add('M', doMotor, "motor");
     __command.add('T', doTarget, "motor target");
@@ -261,7 +318,8 @@ private:
   /// @note 用于确定电机转动的角度上限
   /// @param velocity_limit 校准速度限制
   void __calibration(const float velocity_limit = 20.0,
-                     const int64_t timeout = 1000 * 60) {
+                     const int64_t timeout = 1000 * 60)
+  {
     UTTRACE("Calibration Motor Start.");
     __calibrating_flag = true;               // 设置校准标志位
     __motor.velocity_limit = velocity_limit; // 设置电机速度限制
@@ -277,7 +335,8 @@ private:
     {
       auto curr_angle = __sensor.getAngle();
       __target_angle = curr_angle + 20; // 设置目标角度
-      if (std::abs(__sensor.getAngle() - last_angle) < 0.1) {
+      if (std::abs(__sensor.getAngle() - last_angle) < 0.1)
+      {
         cal_range.second = __sensor.getAngle() - 1.5;
         goto CALIBRATION_SETP2; // 跳转到阶段2
       }
@@ -295,7 +354,8 @@ private:
     {
       auto curr_angle = __sensor.getAngle();
       __target_angle = curr_angle - 20; // 设置目标角度
-      if (std::abs(curr_angle - last_angle) < 0.1) {
+      if (std::abs(curr_angle - last_angle) < 0.1)
+      {
         cal_range.first = __sensor.getAngle() + 1.5;
         goto CALIBRATION_END; // 跳转到阶段3
       }
@@ -321,11 +381,13 @@ private:
     __target_angle = __sensor.getAngle(); // 让电机停止工作
   }
 };
-void doMotor(char *cmd) {
+void doMotor(char *cmd)
+{
   FMotorDriver::instance().get_command().motor(
       &FMotorDriver::instance().get_motor(), cmd);
 }
-void doTarget(char *cmd) {
+void doTarget(char *cmd)
+{
   FMotorDriver::instance().get_command().scalar(
       FMotorDriver::instance().get_target(), cmd);
 } // 串口控制指令：目标值
