@@ -6,7 +6,7 @@ void recveive_handler();
 void setup()
 {
   // sys_nvic_set_vector_table(FLASH_BASE, 0x4000);
-  Serial.begin(115200);
+  Serial.begin(2000000);
   auto print_func = [](const char *message)
   {
     Serial.print(message);
