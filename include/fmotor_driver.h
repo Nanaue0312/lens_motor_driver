@@ -104,7 +104,10 @@ public:
   {
     __motor.init();
     auto re{__motor.initFOC()};
-    UTINFO("Motor ready.");
+    if(re != 1)
+    {
+      UTERROR("motor init failed. status:", re);
+    }
     return re == 1;
   }
 
@@ -198,7 +201,6 @@ public:
     {
       
       set_target_normalized_position(target_angle); // 设置目标位置
-
       handle();
       move_flag = false;
       // 调试部分
