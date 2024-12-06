@@ -44,7 +44,7 @@ void setup()
   UTINFO("Follow Focus Motor Started.");
   utcollab::Task(&FMotorDriver::run_forever, &FMotorDriver::instance()).detach();
   utcollab::Task(recveive_handler).detach();
-  // utcollab::Task(report_status_task).detach();
+  utcollab::Task(report_status_task).detach();
   vTaskStartScheduler();
 
   UTFATAL("Insufficient RAM");
