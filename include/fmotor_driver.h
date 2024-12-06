@@ -1,5 +1,9 @@
 #ifndef __FMOTOR_DRIVER_H__
 #define __FMOTOR_DRIVER_H__
+#include "simple_protocol_impl.h"
+#include "simple_protocol_tpl.h"
+#include "broadcast_data.h"
+SimpleProtocolImpl *sprotocol_recv = dynamic_cast<SimpleProtocolImpl *>(new SimpleProtocolTpl<1, 1, true, 32, 0>({0xA5, 0xA5}));
 
 #include "kth78xx.h"
 #include "utools.h"
@@ -10,6 +14,9 @@ void doTarget(char *cmd);
 class FMotorDriver : public utpattern::Singleton<FMotorDriver>
 {
 public:
+  float target_angle = 0;
+  bool move_flag{false};
+
   FMotorDriver()
   {
     // 1 位置检测传感器初始化
@@ -178,9 +185,8 @@ public:
   {
     static bool first_run{true};
     String rx_str;
-    float target_angle = 0;
+
     static float last_target_angle = 0.0f;
-    bool move_flag{false};
     if (!first_run)
     {
       UTWARN("motor driver already run.");
@@ -188,56 +194,11 @@ public:
     }
     first_run = false;
     UTINFO("motor driver run forever.");
-    while (true)
+    while (true) // 永久循环
     {
-      // 通讯板的串口通讯
-      size_t rx_len{0};
-      while (Serial.available() > 8 && !move_flag)
-      {
-        move_flag = true;
-        rx_str = Serial.readStringUntil('\n').c_str();
-        rx_len = rx_str.length();
-      }
-      if (rx_len > 0)
-      {
+      
+      set_target_normalized_position(target_angle); // 设置目标位置
 
-        // 找到并解析 zoom、focus 和 iris
-        int zoomIndex = rx_str.indexOf("Z");
-        int focusIndex = rx_str.indexOf("F");
-        int irisIndex = rx_str.indexOf("I");
-
-        if (zoomIndex != -1 && focusIndex != -1 && irisIndex != -1)
-        {
-          MotorFuncMode current_mode = CtrlMang::instance().get_motor_func_mode();
-          UTDEBUG("current mode: ", current_mode);
-          float target_angle;
-          if (current_mode == MotorFuncMode::ZOOM)
-          {
-            // 提取 zoom
-            String zoomStr = rx_str.substring(zoomIndex + 1, focusIndex - 1);
-            float zoom = zoomStr.toFloat(); // 转换为 float
-            target_angle = zoom;
-          }
-          else if (current_mode == MotorFuncMode::IRIS)
-          {
-              // 提取 iris
-              String irisStr = rx_str.substring(irisIndex + 1, rx_str.length() - 2); // -2 为去掉 CRC 和空格
-              float iris = irisStr.toFloat();
-              target_angle = iris; // 转换为 float
-          }
-          else if (current_mode == MotorFuncMode::FOCUS)
-          {
-            // 提取 focus
-            String focusStr = rx_str.substring(focusIndex + 1, irisIndex - 1);
-            float focus = focusStr.toFloat(); // 转换为 float
-            target_angle = focus;
-          }
-          set_target_normalized_position(target_angle);
-          last_target_angle = target_angle;
-        }
-
-        rx_len = 0;
-      }
       handle();
       move_flag = false;
       // 调试部分

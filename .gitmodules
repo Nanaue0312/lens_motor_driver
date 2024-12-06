@@ -4,3 +4,12 @@
 [submodule "lib/ukeypad"]
 	path = lib/ukeypad
 	url = https://gitee.com/lyworkspace/ukeypad.git
+[submodule "lib/lib/simple_protocol"]
+	path = lib/lib/simple_protocol
+	url = https://gitee.com/lyworkspace/simple_protocol.git
+[submodule "simple_protocol"]
+	path = simple_protocol
+	url = https://gitee.com/lyworkspace/simple_protocol.git
+[submodule "lib/simple_protocol"]
+	path = lib/simple_protocol
+	url = https://gitee.com/lyworkspace/simple_protocol.git
