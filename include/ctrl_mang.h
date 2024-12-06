@@ -84,7 +84,6 @@ public:
     {
         return motor_func_mode;
     }
-
     /// @brief 设置设备的状态
     /// @param state 设备状态
     void set_device_state(DeviceState state)
