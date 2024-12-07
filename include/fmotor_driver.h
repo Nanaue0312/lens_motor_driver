@@ -71,22 +71,22 @@ public:
     // __motor.PID_velocity.D = 0.001;
     // todo 调整还是存在卡顿
     __motor.PID_velocity.P = 0.01;
-    __motor.PID_velocity.I = 0.03;
-    __motor.PID_velocity.D = 0.0;
-    __motor.PID_velocity.output_ramp = 300.0;
+    __motor.PID_velocity.I = 0.001;
+    __motor.PID_velocity.D = 0;
+    __motor.PID_velocity.output_ramp =1000;
     __motor.PID_velocity.limit = 1.5;
     // Low pass filtering time constant
     __motor.LPF_velocity.Tf = 0.2;
 
     // angle loop PID
     // __motor.P_angle = angle_pid_0;
-    __motor.P_angle.P = 5.0;
-    __motor.P_angle.I = 0.1;
+    __motor.P_angle.P = 80.0;
+    __motor.P_angle.I = 0.01;
     __motor.P_angle.D = 0;
-    __motor.P_angle.output_ramp = 1000.0;
-    __motor.P_angle.limit = 150.0;
+    __motor.P_angle.output_ramp = 10000.0;
+    __motor.P_angle.limit = 200.0;
     // // Low pass filtering time constant
-    __motor.LPF_angle.Tf = 0.1;
+    __motor.LPF_angle.Tf = 0;
 
     // setting the limits
     // maximal velocity of the position control
