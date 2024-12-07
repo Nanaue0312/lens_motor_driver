@@ -6,7 +6,7 @@
 #include "simple_protocol_impl.h"
 #include "simple_protocol_tpl.h"
 SimpleProtocolImpl *sprotocol_report = dynamic_cast<SimpleProtocolImpl *>(new SimpleProtocolTpl<1, 1, true, 32, 0>({0xA5, 0xA5}));
-lens_motor_data_t *motor_report_data;
+lens_motor_data_t motor_report_data;
 void recveive_handler();
 // 上报状态任务
 void report_status_task();
@@ -137,14 +137,14 @@ void report_status_task()
 {
   while (true)
   {
-    // memset(motor_report_data, 0, sizeof(lens_motor_data_t));
-    // motor_report_data->funcode = (uint8_t)(CtrlMang::instance().get_motor_func_mode());
-    // motor_report_data->ts = millis();
-    // motor_report_data->mac = 0x12345678;
-    // motor_report_data->value = CtrlMang::instance().get_target_normalized_postion();
-    // motor_report_data->flag_status = (uint8_t)(CtrlMang::instance().device_state);
+    memset(&motor_report_data, 0, sizeof(lens_motor_data_t));
+    motor_report_data.funcode = (uint8_t)(CtrlMang::instance().get_motor_func_mode());
+    motor_report_data.ts = millis();
+    motor_report_data.mac = 0x12345678;
+    motor_report_data.value = CtrlMang::instance().get_target_normalized_postion();
+    motor_report_data.flag_status = (uint8_t)(CtrlMang::instance().device_state);
     auto frame{sprotocol_report->make_packer(1, 32)};
-    frame.push_back(motor_report_data, sizeof(broadcast_data_t)).end_pack();
+    frame.push_back(&motor_report_data, sizeof(broadcast_data_t)).end_pack();
     Serial.write(frame().data(), frame().size());
     utcollab::Task::sleep_for(100);
   }
