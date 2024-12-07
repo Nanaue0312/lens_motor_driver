@@ -144,7 +144,7 @@ void report_status_task()
     motor_report_data.value = CtrlMang::instance().get_target_normalized_postion();
     motor_report_data.flag_status = (uint8_t)(CtrlMang::instance().device_state);
     auto frame{sprotocol_report->make_packer(1, 32)};
-    frame.push_back(&motor_report_data, sizeof(broadcast_data_t)).end_pack();
+    frame.push_back(&motor_report_data, sizeof(lens_motor_data_t)).end_pack();
     Serial.write(frame().data(), frame().size());
     utcollab::Task::sleep_for(100);
   }
