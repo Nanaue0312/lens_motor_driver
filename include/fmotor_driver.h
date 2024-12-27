@@ -3,7 +3,7 @@
 #include "simple_protocol_impl.h"
 #include "simple_protocol_tpl.h"
 #include "broadcast_data.h"
-SimpleProtocolImpl *sprotocol_recv = dynamic_cast<SimpleProtocolImpl *>(new SimpleProtocolTpl<1, 1, true, 32, 0>({0xA5, 0xA5}));
+SimpleProtocolImpl *sprotocol_recv = dynamic_cast<SimpleProtocolImpl *>(new SimpleProtocolTpl<1, 1, true, 32, 0>({0xA5, 0xAB}));
 
 #include "kth78xx.h"
 #include "utools.h"

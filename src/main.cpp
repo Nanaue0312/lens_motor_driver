@@ -5,7 +5,7 @@
 #include "motor_comm.h"
 #include "simple_protocol_impl.h"
 #include "simple_protocol_tpl.h"
-SimpleProtocolImpl *sprotocol_report = dynamic_cast<SimpleProtocolImpl *>(new SimpleProtocolTpl<1, 1, true, 32, 0>({0xA5, 0xA5}));
+SimpleProtocolImpl *sprotocol_report = dynamic_cast<SimpleProtocolImpl *>(new SimpleProtocolTpl<1, 1, true, 32, 0>({0xA5, 0xAB}));
 lens_motor_data_t motor_report_data;
 void recveive_handler();
 // 上报状态任务
