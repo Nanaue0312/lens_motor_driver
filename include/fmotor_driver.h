@@ -222,13 +222,18 @@ public:
   BLDCMotor &get_motor() { return __motor; }
   Commander &get_command() { return __command; }
   void set_target(float target) { __target_angle = target; }
-  float *get_target() { return &__target_angle; }
-
+  float get_target() { return __target_angle; }
+  /**
+   * @brief 获取当前角度（弧度值）
+   * @return 
+   */
+  float get_current_target(){
+      return __sensor.getSensorAngle();
+  }
 private:
   // 电机角度范围
   std::pair<float, float> __angle_range{0, 45};
 
-  float current_angle = 0;
   // voltage set point variable
   float __target_angle = 0;
   float target_angle_rec_uart = 0;
