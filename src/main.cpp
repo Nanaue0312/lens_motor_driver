@@ -95,7 +95,7 @@ void recveive_handler()
               break;
             case 1:
               // 校准中
-              //donothing
+              // donothing
               break;
             case 2:
               // 校准完成
@@ -103,9 +103,25 @@ void recveive_handler()
               break;
             case 3:
               // 校准错误
-              //donothing
+              // donothing
               break;
             default:
+              break;
+            }
+            //切换速度
+            switch (received_data->motorflag_zoom_speed)
+            {
+            case 1:
+              // 慢速
+              FMotorDriver::instance().set_speed(0.007);
+              break;
+            case 2:
+              // 中速
+              FMotorDriver::instance().set_speed(0.01);
+              break;
+            case 3:
+              // 快速
+              FMotorDriver::instance().set_speed(0.013);
               break;
             }
           }
@@ -119,7 +135,7 @@ void recveive_handler()
               break;
             case 1:
               // 校准中
-              //donothing
+              // donothing
               break;
             case 2:
               // 校准完成
@@ -127,9 +143,24 @@ void recveive_handler()
               break;
             case 3:
               // 校准错误
-              //donothing
+              // donothing
               break;
             default:
+              break;
+            }
+            switch (received_data->motorflag_iris_speed)
+            {
+            case 1:
+              // 慢速
+              FMotorDriver::instance().set_speed(0.007);
+              break;
+            case 2:
+              // 中速
+              FMotorDriver::instance().set_speed(0.01);
+              break;
+            case 3:
+              // 快速
+              FMotorDriver::instance().set_speed(0.013);
               break;
             }
           }
@@ -143,7 +174,7 @@ void recveive_handler()
               break;
             case 1:
               // 校准中
-              //donothing
+              // donothing
               break;
             case 2:
               // 校准完成
@@ -151,7 +182,24 @@ void recveive_handler()
               break;
             case 3:
               // 校准错误
-              //donothing
+              // donothing
+              break;
+            default:
+              break;
+            }
+            switch (received_data->motorflag_focus_speed)
+            {
+            case 1:
+              // 慢速
+              FMotorDriver::instance().set_speed(0.007);
+              break;
+            case 2:
+              // 中速
+              FMotorDriver::instance().set_speed(0.01);
+              break;
+            case 3:
+              // 快速
+              FMotorDriver::instance().set_speed(0.013);
               break;
             default:
               break;

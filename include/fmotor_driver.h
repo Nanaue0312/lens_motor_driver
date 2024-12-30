@@ -28,7 +28,7 @@ public:
     // 2 驱动程序配置
     __driver.voltage_power_supply = 12; // 电源电压 [V]
     __driver.voltage_limit = 24;
-    __driver.pwm_frequency = 20000;
+    __driver.pwm_frequency = 80000;
     auto re_dr = __driver.init();
     if (re_dr != 1)
     {
@@ -53,7 +53,6 @@ public:
 
     __motor.torque_controller = TorqueControlType::voltage;
     __motor.controller = MotionControlType::angle;
-    // __motor.motion_downsample = 2; // 下采样配置，每调用n次 __motor.move()
     // 才执行一次运动控制
 
     // // foc current control parameters (Arduino UNO/Mega)
@@ -64,16 +63,17 @@ public:
     // __motor.LPF_current_q.Tf = 0.4;
     // __motor.LPF_current_d.Tf = 0.5;
     __motor.foc_modulation = FOCModulationType::SpaceVectorPWM;
+    
     // __motor.target = 2;
     // velocity loop PID
     // __motor.PID_velocity.P = 0.3;
     // __motor.PID_velocity.I = 0.3;
     // __motor.PID_velocity.D = 0.001;
     // todo 调整还是存在卡顿
-    __motor.PID_velocity.P = 0.01;
+    __motor.PID_velocity.P = 0.007;
     __motor.PID_velocity.I = 0.001;
     __motor.PID_velocity.D = 0;
-    __motor.PID_velocity.output_ramp =1000;
+    __motor.PID_velocity.output_ramp =10000;
     __motor.PID_velocity.limit = 1.5;
     // Low pass filtering time constant
     __motor.LPF_velocity.Tf = 0.2;
@@ -122,7 +122,9 @@ public:
     utcollab::Task(&FMotorDriver::__calibration, this, 20.0, 1000 * 60)
         .detach(256);
   }
-
+  void set_speed(float speed){
+    __motor.PID_velocity.P = speed;
+  }
   /// @brief 设定目标角度
   /// @param angle 目标角度
   /// @return 目标角度
@@ -149,7 +151,11 @@ public:
    * 
    * @param speed 速度值,每分钟的圈数rpm
    */
-  void set_speed(float speed){}
+  void set_speed(float speed, uint8_t motor_type){
+    if(motor_type == 1){
+      __motor.PID_velocity.P = speed;
+    }
+  }
 
   /// @brief 运动到目标角度
   /// @note 调用频率大于1kHz
