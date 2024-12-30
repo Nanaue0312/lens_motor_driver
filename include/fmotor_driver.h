@@ -144,6 +144,13 @@ public:
     return __target_angle;
   }
 
+  /**
+   * @brief 设置电机的移动速度
+   * 
+   * @param speed 速度值,每分钟的圈数rpm
+   */
+  void set_speed(float speed){}
+
   /// @brief 运动到目标角度
   /// @note 调用频率大于1kHz
   inline void handle()
