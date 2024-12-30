@@ -87,13 +87,23 @@ void recveive_handler()
           // 根据当前模式提取数据
           if (current_mode == MotorFuncMode::ZOOM)
           {
+            // 0校准，1校准中，2校准完成，3校准错误
             switch (received_data->motorflag_zoom_cal)
             {
             case 0:
-              FMotorDriver::instance().target_angle = received_data->zoom; // 提取 zoom 值
+              FMotorDriver::instance().calibration();
               break;
             case 1:
-              FMotorDriver::instance().calibration();
+              // 校准中
+              //donothing
+              break;
+            case 2:
+              // 校准完成
+              FMotorDriver::instance().target_angle = received_data->zoom; // 提取 zoom 值
+              break;
+            case 3:
+              // 校准错误
+              //donothing
               break;
             default:
               break;
@@ -101,13 +111,23 @@ void recveive_handler()
           }
           else if (current_mode == MotorFuncMode::IRIS)
           {
+            // 0校准，1校准中，2校准完成，3校准错误
             switch (received_data->motorflag_iris_cal)
             {
             case 0:
-              FMotorDriver::instance().target_angle = received_data->iris; // 提取 iris 值
+              FMotorDriver::instance().calibration(); // 提取 iris 值
               break;
             case 1:
-              FMotorDriver::instance().calibration();
+              // 校准中
+              //donothing
+              break;
+            case 2:
+              // 校准完成
+              FMotorDriver::instance().target_angle = received_data->iris; // 提取 iris 值
+              break;
+            case 3:
+              // 校准错误
+              //donothing
               break;
             default:
               break;
@@ -115,13 +135,23 @@ void recveive_handler()
           }
           else if (current_mode == MotorFuncMode::FOCUS)
           {
+            // 0校准，1校准中，2校准完成，3校准错误
             switch (received_data->motorflag_focus_cal)
             {
             case 0:
-              FMotorDriver::instance().target_angle = received_data->focus; // 提取 focus 值
+              FMotorDriver::instance().calibration(); // 提取 focus 值
               break;
             case 1:
-              FMotorDriver::instance().calibration();
+              // 校准中
+              //donothing
+              break;
+            case 2:
+              // 校准完成
+              FMotorDriver::instance().target_angle = received_data->focus; // 提取 focus 值
+              break;
+            case 3:
+              // 校准错误
+              //donothing
               break;
             default:
               break;
@@ -141,7 +171,7 @@ void report_status_task()
     memset(&motor_report_data, 0, sizeof(lens_motor_data_t));
     motor_report_data.funcode = (uint8_t)(CtrlMang::instance().get_motor_func_mode());
     motor_report_data.ts = millis();
-    motor_report_data.mac = AppVersion::mac();;
+    motor_report_data.mac = AppVersion::mac();
     motor_report_data.value = FMotorDriver::instance().get_current_target();
     motor_report_data.flag_status_cal = (uint8_t)(CtrlMang::instance().device_state);
     auto frame{sprotocol_report->make_packer(1, 32)};
