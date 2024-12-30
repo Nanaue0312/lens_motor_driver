@@ -24,6 +24,8 @@ enum class DeviceState
     INIT,        // 初始化中
     PAIRING,     // 配对中
     CALIBRATION, // 校准中
+    CALIBRATION_OK, // 校准成功
+    CALIBRATION_ERROR, // 校准错误
     RUNNING,     // 运行中
     ERROR,       // 错误
 };
@@ -102,9 +104,13 @@ public:
             case DeviceState::CALIBRATION:
                 utcollab::Task(&CtrlMang::__state_led_calibration, this).detach(1024, 0, 4, -1);
                 break;
+            case DeviceState::CALIBRATION_OK:
             case DeviceState::RUNNING:
                 // __state_led_running();
                 utcollab::Task(&CtrlMang::__state_led_running, this).detach(1024, 0, 4, -1);
+                break;
+            case DeviceState::CALIBRATION_ERROR:
+                utcollab::Task(&CtrlMang::__state_led_calibration_error, this).detach(1024, 0, 4, -1);
                 break;
             case DeviceState::ERROR:
                 // __state_led_error();
@@ -248,7 +254,17 @@ private:
             utcollab::Task::sleep_for(500);
         }
     }
-
+    /// @brief 校准错误状态的led显示
+    void __state_led_calibration_error()
+    {
+        while (device_state == DeviceState::CALIBRATION_ERROR)
+        {
+            state_led1.on();
+            state_led2.on();
+            state_led3.off();
+            utcollab::Task::sleep_for(500);
+        }
+    }
     /// @brief 更新按键事件
     void __update_key_loop()
     {
