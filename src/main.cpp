@@ -87,7 +87,7 @@ void recveive_handler()
           // 根据当前模式提取数据
           if (current_mode == MotorFuncMode::ZOOM)
           {
-            switch (received_data->motorflag_zoom)
+            switch (received_data->motorflag_zoom_cal)
             {
             case 0:
               FMotorDriver::instance().target_angle = received_data->zoom; // 提取 zoom 值
@@ -101,7 +101,7 @@ void recveive_handler()
           }
           else if (current_mode == MotorFuncMode::IRIS)
           {
-            switch (received_data->motorflag_iris)
+            switch (received_data->motorflag_iris_cal)
             {
             case 0:
               FMotorDriver::instance().target_angle = received_data->iris; // 提取 iris 值
@@ -115,7 +115,7 @@ void recveive_handler()
           }
           else if (current_mode == MotorFuncMode::FOCUS)
           {
-            switch (received_data->motorflag_focus)
+            switch (received_data->motorflag_focus_cal)
             {
             case 0:
               FMotorDriver::instance().target_angle = received_data->focus; // 提取 focus 值
@@ -143,20 +143,10 @@ void report_status_task()
     motor_report_data.ts = millis();
     motor_report_data.mac = AppVersion::mac();;
     motor_report_data.value = FMotorDriver::instance().get_current_target();
-    motor_report_data.flag_status = (uint8_t)(CtrlMang::instance().device_state);
+    motor_report_data.flag_status_cal = (uint8_t)(CtrlMang::instance().device_state);
     auto frame{sprotocol_report->make_packer(1, 32)};
     frame.push_back(&motor_report_data, sizeof(lens_motor_data_t)).end_pack();
     Serial.write(frame().data(), frame().size());
     utcollab::Task::sleep_for(15);
   }
 }
-// void setup()
-// {
-//   Serial.begin(115200);
-// }
-// void loop()
-// { // 发送0~20十六进制
-//   uint8_t i[20] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13};
-//   Serial.write(i, sizeof(i));
-//   delay(100);
-// }
