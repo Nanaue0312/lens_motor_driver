@@ -223,12 +223,13 @@ public:
   Commander &get_command() { return __command; }
   void set_target(float target) { __target_angle = target; }
   float *get_target() { return &__target_angle; }
+
   /**
    * @brief 获取当前角度（弧度值）
    * @return 
    */
   float get_current_target(){
-      return __sensor.getSensorAngle();
+      return utmath::linear_map(__sensor.getSensorAngle() / 3.14f * 180 , 0, 1, __angle_range.first, __angle_range.second);
   }
 private:
   // 电机角度范围
@@ -320,11 +321,13 @@ private:
     // 校准出现超时
   CALIBRATION_TIMEOUT:
     UTTRACE("Calibration Motor Timeout.");
+    CtrlMang::instance().set_device_state(DeviceState::CALIBRATION_ERROR);
     goto CALIBRATION_CLEAR;
 
     // 校准结束
   CALIBRATION_END:
     __angle_range.swap(cal_range); // 交换角度范围
+    CtrlMang::instance().set_device_state(DeviceState::CALIBRATION_OK);
     UTTRACE("Calibration Motor Range of Motion is: [", __angle_range.first, ",",
             __angle_range.second, "]");
     UTTRACE("Calibration Motor End.");
