@@ -60,156 +60,83 @@ void loop()
   // not used
 }
 
-void recveive_handler()
-{
-  UTDEBUG("Serial recv handler started.");
-  while (true)
-  {
-    auto recv_len = Serial.available();
-    // 检查串口是否有足够的数据可读
-    if (recv_len > 0 && !FMotorDriver::instance().move_flag)
-    {
-
-      uint8_t recv_buffer[32];
-      FMotorDriver::instance().move_flag = true; // 设置移动标志
-
-      // 从串口读取数据到结构体中
-      Serial.readBytes(recv_buffer, recv_len);
-      auto frms{sprotocol_recv->push_back(recv_buffer, recv_len).parse_all()};
-      for (auto &frm : frms)
-      {
-        if (frm.is_valid())
-        {
-          broadcast_data_t *received_data = reinterpret_cast<broadcast_data_t *>(const_cast<uint8_t *>(frm.data.data()));
-          // 获取当前模式
-          MotorFuncMode current_mode = CtrlMang::instance().get_motor_func_mode();
-          UTDEBUG("current mode: ", current_mode);
-          // 根据当前模式提取数据
-          if (current_mode == MotorFuncMode::ZOOM)
-          {
-            // 0校准，1校准中，2校准完成，3校准错误
-            switch (received_data->motorflag_zoom_cal)
-            {
-            case 0:
-              FMotorDriver::instance().calibration();
-              break;
-            case 1:
-              // 校准中
-              // donothing
-              break;
-            case 2:
-              // 校准完成
-              FMotorDriver::instance().target_angle = received_data->zoom; // 提取 zoom 值
-              break;
-            case 3:
-              // 校准错误
-              // donothing
-              break;
-            default:
-              break;
-            }
-            //切换速度
-            switch (received_data->motorflag_zoom_speed)
-            {
-            case 1:
-              // 慢速
-              FMotorDriver::instance().set_speed(0.007);
-              break;
-            case 2:
-              // 中速
-              FMotorDriver::instance().set_speed(0.01);
-              break;
-            case 3:
-              // 快速
-              FMotorDriver::instance().set_speed(0.013);
-              break;
-            }
-          }
-          else if (current_mode == MotorFuncMode::IRIS)
-          {
-            // 0校准，1校准中，2校准完成，3校准错误
-            switch (received_data->motorflag_iris_cal)
-            {
-            case 0:
-              FMotorDriver::instance().calibration(); // 提取 iris 值
-              break;
-            case 1:
-              // 校准中
-              // donothing
-              break;
-            case 2:
-              // 校准完成
-              FMotorDriver::instance().target_angle = received_data->iris; // 提取 iris 值
-              break;
-            case 3:
-              // 校准错误
-              // donothing
-              break;
-            default:
-              break;
-            }
-            switch (received_data->motorflag_iris_speed)
-            {
-            case 1:
-              // 慢速
-              FMotorDriver::instance().set_speed(0.007);
-              break;
-            case 2:
-              // 中速
-              FMotorDriver::instance().set_speed(0.01);
-              break;
-            case 3:
-              // 快速
-              FMotorDriver::instance().set_speed(0.013);
-              break;
-            }
-          }
-          else if (current_mode == MotorFuncMode::FOCUS)
-          {
-            // 0校准，1校准中，2校准完成，3校准错误
-            switch (received_data->motorflag_focus_cal)
-            {
-            case 0:
-              FMotorDriver::instance().calibration(); // 提取 focus 值
-              break;
-            case 1:
-              // 校准中
-              // donothing
-              break;
-            case 2:
-              // 校准完成
-              FMotorDriver::instance().target_angle = received_data->focus; // 提取 focus 值
-              break;
-            case 3:
-              // 校准错误
-              // donothing
-              break;
-            default:
-              break;
-            }
-            switch (received_data->motorflag_focus_speed)
-            {
-            case 1:
-              // 慢速
-              FMotorDriver::instance().set_speed(0.007);
-              break;
-            case 2:
-              // 中速
-              FMotorDriver::instance().set_speed(0.01);
-              break;
-            case 3:
-              // 快速
-              FMotorDriver::instance().set_speed(0.013);
-              break;
-            default:
-              break;
-            }
-          }
-        }
-      }
+void handle_calibration(uint8_t cal_flag, float target_value) {
+    switch (cal_flag) {
+    case 0:
+        FMotorDriver::instance().calibration();
+        break;
+    case 2:
+        FMotorDriver::instance().target_angle = target_value;
+        break;
+    // case 1,3: do nothing
     }
-    utcollab::Task::sleep_for(5);
-  }
+}
+
+void handle_speed_setting(uint8_t speed_flag) {
+    const float SPEED_SLOW = 0.007f;
+    const float SPEED_MEDIUM = 0.01f;
+    const float SPEED_FAST = 0.013f;
+    
+    switch (speed_flag) {
+    case 1:
+        FMotorDriver::instance().set_speed(SPEED_SLOW);
+        break;
+    case 2:
+        FMotorDriver::instance().set_speed(SPEED_MEDIUM);
+        break;
+    case 3:
+        FMotorDriver::instance().set_speed(SPEED_FAST);
+        break;
+    }
+}
+
+void process_mode_data(MotorFuncMode mode, const broadcast_data_t* data) {
+    switch (mode) {
+    case MotorFuncMode::ZOOM:
+        handle_calibration(data->motorflag_zoom_cal, data->zoom);
+        handle_speed_setting(data->motorflag_zoom_speed);
+        break;
+    case MotorFuncMode::IRIS:
+        handle_calibration(data->motorflag_iris_cal, data->iris);
+        handle_speed_setting(data->motorflag_iris_speed);
+        break;
+    case MotorFuncMode::FOCUS:
+        handle_calibration(data->motorflag_focus_cal, data->focus);
+        handle_speed_setting(data->motorflag_focus_speed);
+        break;
+    }
+}
+
+void recveive_handler() {
+    UTDEBUG("Serial recv handler started.");
+    const size_t BUFFER_SIZE = 32;
+    uint8_t recv_buffer[BUFFER_SIZE];
+    
+    while (true) {
+        auto recv_len = Serial.available();
+        auto& motor = FMotorDriver::instance();
+        
+        if (recv_len > 0 && !motor.move_flag) {
+            motor.move_flag = true;
+            
+            Serial.readBytes(recv_buffer, recv_len);
+            auto frms{sprotocol_recv->push_back(recv_buffer, recv_len).parse_all()};
+            
+            for (const auto &frm : frms) {
+                if (frm.is_valid()) {
+                    auto* received_data = reinterpret_cast<broadcast_data_t*>(
+                        const_cast<uint8_t*>(frm.data.data())
+                    );
+                    
+                    auto current_mode = CtrlMang::instance().get_motor_func_mode();
+                    UTDEBUG("current mode: ", current_mode);
+                    
+                    process_mode_data(current_mode, received_data);
+                }
+            }
+        }
+        utcollab::Task::sleep_for(5);
+    }
 }
 
 void report_status_task()
