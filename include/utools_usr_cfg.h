@@ -26,12 +26,13 @@
 #define UTOOLS_NEWLIB__GETTOPICTIME_ENABLE UTOOLS_TRUE
 //CRC校验功能
 #define UTOOLS_CODE_CRC_ENABLE UTOOLS_TRUE
-
+//md5
+#define UTOOLS_CODE_MD5_ENABLE UTOOLS_TRUE
 // 关于功能，提供版本管理器
-// #define UTOOLS_ABOUT_ENABLE UTOOLS_TRUE
+#define UTOOLS_ABOUT_ENABLE UTOOLS_TRUE
 
 // 代码字节功能，ByteStruct
-// #define UTOOLS_BYTES_STRUCT_ENABLE UTOOLS_TRUE
+#define UTOOLS_BYTES_STRUCT_ENABLE UTOOLS_TRUE
 
 // 异步订阅与发布功能
 // #define UTOOLS_ASYNC_PUBSUB_ENABLE UTOOLS_TRUE
@@ -39,6 +40,7 @@
 // #define UTOOLS_PUBSUB_ENABLE UTOOLS_TRUE
 
 // 关于功能，提供版本管理器
-// #define UTOOLS_ABOUT_INCLUDE "../../../app_version.h"
+#define UTOOLS_ABOUT_INCLUDE "../../../include\version_mang\app_version_def.h"
+
 
 #endif // __UTOOLS_USER_CFG_H__

@@ -222,7 +222,7 @@ public:
   BLDCMotor &get_motor() { return __motor; }
   Commander &get_command() { return __command; }
   void set_target(float target) { __target_angle = target; }
-  float get_target() { return __target_angle; }
+  float *get_target() { return &__target_angle; }
   /**
    * @brief 获取当前角度（弧度值）
    * @return 
