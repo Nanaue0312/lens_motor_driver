@@ -5,6 +5,7 @@
 #include "motor_comm.h"
 #include "simple_protocol_impl.h"
 #include "simple_protocol_tpl.h"
+#include "app_version.h"
 SimpleProtocolImpl *sprotocol_report = dynamic_cast<SimpleProtocolImpl *>(new SimpleProtocolTpl<1, 1, true, 32, 0>({0xA5, 0xAB}));
 lens_motor_data_t motor_report_data;
 void recveive_handler();
@@ -129,7 +130,7 @@ void recveive_handler()
         }
       }
     }
-    utcollab::Task::sleep_for(1);
+    utcollab::Task::sleep_for(5);
   }
 }
 
@@ -140,12 +141,22 @@ void report_status_task()
     memset(&motor_report_data, 0, sizeof(lens_motor_data_t));
     motor_report_data.funcode = (uint8_t)(CtrlMang::instance().get_motor_func_mode());
     motor_report_data.ts = millis();
-    motor_report_data.mac = 0x12345678;
-    motor_report_data.value = CtrlMang::instance().get_target_normalized_postion();
+    motor_report_data.mac = AppVersion::mac();;
+    motor_report_data.value = FMotorDriver::instance().get_current_target();
     motor_report_data.flag_status = (uint8_t)(CtrlMang::instance().device_state);
     auto frame{sprotocol_report->make_packer(1, 32)};
     frame.push_back(&motor_report_data, sizeof(lens_motor_data_t)).end_pack();
     Serial.write(frame().data(), frame().size());
-    utcollab::Task::sleep_for(100);
+    utcollab::Task::sleep_for(15);
   }
 }
+// void setup()
+// {
+//   Serial.begin(115200);
+// }
+// void loop()
+// { // 发送0~20十六进制
+//   uint8_t i[20] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13};
+//   Serial.write(i, sizeof(i));
+//   delay(100);
+// }
