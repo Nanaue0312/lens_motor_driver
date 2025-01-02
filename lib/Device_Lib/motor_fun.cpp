@@ -250,7 +250,7 @@ void TaskCalibration(void *pvParameters)
                 last_Angle = sensor.getAngle();
             }
         }
-
+       
         vTaskDelay(25);
     }
     UTINFO("TaskCalibration exit");

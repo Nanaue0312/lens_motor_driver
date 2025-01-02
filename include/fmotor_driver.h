@@ -70,13 +70,13 @@ public:
         // __motor.PID_velocity.I = 0.3;
         // __motor.PID_velocity.D = 0.001;
         // todo 调整还是存在卡顿
-        __motor.PID_velocity.P = 0.007;
-        __motor.PID_velocity.I = 0.001;
+        __motor.PID_velocity.P = 0.3;
+        __motor.PID_velocity.I = 0.000;
         __motor.PID_velocity.D = 0;
         __motor.PID_velocity.output_ramp = 10000;
-        __motor.PID_velocity.limit = 1.5;
+        __motor.PID_velocity.limit = 2;
         // Low pass filtering time constant
-        __motor.LPF_velocity.Tf = 0.2;
+        __motor.LPF_velocity.Tf = 0.01;
 
         // angle loop PID
         // __motor.P_angle = angle_pid_0;
@@ -121,7 +121,7 @@ public:
             UTINFO("Motor is already calibrating.");
             return;
         }
-        utcollab::Task(&FMotorDriver::__calibration, this, 300.0, 1000 * 60)
+        utcollab::Task(&FMotorDriver::__calibration, this, 300.0, 1000 * 6)
             .detach(512);
     }
 
@@ -292,7 +292,7 @@ private:
     void __calibration(const float velocity_limit = 20.0,
                        const int64_t timeout = 1000 * 60)
     {
-        UTTRACE("Calibration Motor Start.");
+        //UTTRACE("Calibration Motor Start.");
         __calibrating_flag = true;               // 设置校准标志位
         __calibrate_stop = false;                // 重置校准停止标志位
         __motor.velocity_limit = velocity_limit; // 设置电机速度限制
@@ -302,9 +302,9 @@ private:
         std::pair<float, float> cal_range{0, 0}; // 校准范围
 
         // 阶段1：电机正转
-        UTTRACE("Calibration Motor Forward.");
-        auto start_time{utime::boot_ts()};              // 记录开始时间
-        while (utime::boot_ts() - start_time < timeout) // 最多执行1分钟
+        //UTTRACE("Calibration Motor Forward.");
+        auto start_time{millis()};              // 记录开始时间
+        while (millis() - start_time < timeout) // 最多执行1分钟
         {
             if (__calibrate_stop)
             {
@@ -324,10 +324,10 @@ private:
 
         // 阶段2：电机反转
     CALIBRATION_SETP2: // 跳转设置2
-        UTTRACE("Calibration Motor Backward.");
-        start_time = utime::boot_ts();                  // 记录开始时间
+        //UTTRACE("Calibration Motor Backward.");
+        start_time = millis();                  // 记录开始时间
         __target_angle = cal_range.second - 20;         // 设置目标角度
-        while (utime::boot_ts() - start_time < timeout) // 最多执行1分钟
+        while (millis() - start_time < timeout) // 最多执行1分钟
         {
             if (__calibrate_stop)
             {
@@ -346,7 +346,7 @@ private:
 
         // 校准出现超时
     CALIBRATION_TIMEOUT:
-        UTTRACE("Calibration Motor Timeout.");
+        //UTTRACE("Calibration Motor Timeout.");
         CtrlMang::instance().set_device_state(DeviceState::CALIBRATION_ERROR);
         goto CALIBRATION_CLEAR;
 
@@ -355,9 +355,9 @@ private:
         __angle_range.swap(cal_range); // 交换角度范围
     CALIBRATION_STOPPED:
         CtrlMang::instance().set_device_state(DeviceState::CALIBRATION_OK);
-        UTTRACE("Calibration Motor Range of Motion is: [", __angle_range.first, ",",
-                __angle_range.second, "]");
-        UTTRACE("Calibration Motor End.");
+        //UTTRACE("Calibration Motor Range of Motion is: [", __angle_range.first, ",",
+                // __angle_range.second, "]");
+        //UTTRACE("Calibration Motor End.");
 
         // 清除校准标志等
     CALIBRATION_CLEAR:

@@ -60,83 +60,94 @@ void loop()
   // not used
 }
 
-void handle_calibration(uint8_t cal_flag, float target_value) {
-    switch (cal_flag) {
-    case 0:
-        FMotorDriver::instance().calibration();
-        break;
-    case 2:
-        FMotorDriver::instance().target_angle = target_value;
-        break;
+void handle_calibration(uint8_t cal_flag, float target_value)
+{
+  switch (cal_flag)
+  {
+  case 0:
+    FMotorDriver::instance().calibration();
+    break;
+  case 2:
+    FMotorDriver::instance().stop_calibration();
+    FMotorDriver::instance().target_angle = target_value;
+    break;
     // case 1,3: do nothing
-    }
+  }
 }
 
-void handle_speed_setting(uint8_t speed_flag) {
-    const float SPEED_SLOW = 0.007f;
-    const float SPEED_MEDIUM = 0.01f;
-    const float SPEED_FAST = 0.013f;
-    
-    switch (speed_flag) {
-    case 1:
-        FMotorDriver::instance().set_speed(SPEED_SLOW);
-        break;
-    case 2:
-        FMotorDriver::instance().set_speed(SPEED_MEDIUM);
-        break;
-    case 3:
-        FMotorDriver::instance().set_speed(SPEED_FAST);
-        break;
-    }
+void handle_speed_setting(uint8_t speed_flag)
+{
+  const float SPEED_SLOW = 0.007f;
+  const float SPEED_MEDIUM = 0.01f;
+  const float SPEED_FAST = 0.013f;
+
+  switch (speed_flag)
+  {
+  case 1:
+    FMotorDriver::instance().set_speed(SPEED_SLOW);
+    break;
+  case 2:
+    FMotorDriver::instance().set_speed(SPEED_MEDIUM);
+    break;
+  case 3:
+    FMotorDriver::instance().set_speed(SPEED_FAST);
+    break;
+  }
 }
 
-void process_mode_data(MotorFuncMode mode, const broadcast_data_t* data) {
-    switch (mode) {
-    case MotorFuncMode::ZOOM:
-        handle_calibration(data->motorflag_zoom_cal, data->zoom);
-        handle_speed_setting(data->motorflag_zoom_speed);
-        break;
-    case MotorFuncMode::IRIS:
-        handle_calibration(data->motorflag_iris_cal, data->iris);
-        handle_speed_setting(data->motorflag_iris_speed);
-        break;
-    case MotorFuncMode::FOCUS:
-        handle_calibration(data->motorflag_focus_cal, data->focus);
-        handle_speed_setting(data->motorflag_focus_speed);
-        break;
-    }
+void process_mode_data(MotorFuncMode mode, const broadcast_data_t *data)
+{
+  switch (mode)
+  {
+  case MotorFuncMode::ZOOM:
+    handle_calibration(data->motorflag_zoom_cal, data->zoom);
+    handle_speed_setting(data->motorflag_zoom_speed);
+    break;
+  case MotorFuncMode::IRIS:
+    handle_calibration(data->motorflag_iris_cal, data->iris);
+    handle_speed_setting(data->motorflag_iris_speed);
+    break;
+  case MotorFuncMode::FOCUS:
+    handle_calibration(data->motorflag_focus_cal, data->focus);
+    handle_speed_setting(data->motorflag_focus_speed);
+    break;
+  }
 }
 
-void recveive_handler() {
-    UTDEBUG("Serial recv handler started.");
-    const size_t BUFFER_SIZE = 32;
-    uint8_t recv_buffer[BUFFER_SIZE];
-    
-    while (true) {
-        auto recv_len = Serial.available();
-        auto& motor = FMotorDriver::instance();
-        
-        if (recv_len > 0 && !motor.move_flag) {
-            motor.move_flag = true;
-            
-            Serial.readBytes(recv_buffer, recv_len);
-            auto frms{sprotocol_recv->push_back(recv_buffer, recv_len).parse_all()};
-            
-            for (const auto &frm : frms) {
-                if (frm.is_valid()) {
-                    auto* received_data = reinterpret_cast<broadcast_data_t*>(
-                        const_cast<uint8_t*>(frm.data.data())
-                    );
-                    
-                    auto current_mode = CtrlMang::instance().get_motor_func_mode();
-                    UTDEBUG("current mode: ", current_mode);
-                    
-                    process_mode_data(current_mode, received_data);
-                }
-            }
+void recveive_handler()
+{
+  UTDEBUG("Serial recv handler started.");
+  const size_t BUFFER_SIZE = 32;
+  uint8_t recv_buffer[BUFFER_SIZE];
+
+  while (true)
+  {
+    auto recv_len = Serial.available();
+    auto &motor = FMotorDriver::instance();
+
+    if (recv_len > 0 && !motor.move_flag)
+    {
+      motor.move_flag = true;
+
+      Serial.readBytes(recv_buffer, recv_len);
+      auto frms{sprotocol_recv->push_back(recv_buffer, recv_len).parse_all()};
+
+      for (const auto &frm : frms)
+      {
+        if (frm.is_valid())
+        {
+          auto *received_data = reinterpret_cast<broadcast_data_t *>(
+              const_cast<uint8_t *>(frm.data.data()));
+
+          auto current_mode = CtrlMang::instance().get_motor_func_mode();
+          UTDEBUG("current mode: ", current_mode);
+
+          process_mode_data(current_mode, received_data);
         }
-        utcollab::Task::sleep_for(5);
+      }
     }
+    utcollab::Task::sleep_for(5);
+  }
 }
 
 void report_status_task()
@@ -148,7 +159,12 @@ void report_status_task()
     motor_report_data.ts = millis();
     motor_report_data.mac = AppVersion::mac();
     motor_report_data.value = FMotorDriver::instance().get_current_target();
-    motor_report_data.flag_status_cal = (uint8_t)(CtrlMang::instance().device_state);
+    if (CtrlMang::instance().device_state == DeviceState::CALIBRATION)
+      motor_report_data.flag_status_cal = 2;
+    else if (CtrlMang::instance().device_state == DeviceState::CALIBRATION_OK)
+    {
+      motor_report_data.flag_status_cal = 3;
+    }
     auto frame{sprotocol_report->make_packer(1, 32)};
     frame.push_back(&motor_report_data, sizeof(lens_motor_data_t)).end_pack();
     Serial.write(frame().data(), frame().size());
