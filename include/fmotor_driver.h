@@ -74,23 +74,23 @@ public:
         __motor.PID_velocity.I = 0.000;
         __motor.PID_velocity.D = 0;
         __motor.PID_velocity.output_ramp = 10000;
-        __motor.PID_velocity.limit = 2;
+        __motor.PID_velocity.limit = 20;
         // Low pass filtering time constant
         __motor.LPF_velocity.Tf = 0.01;
 
         // angle loop PID
         // __motor.P_angle = angle_pid_0;
-        __motor.P_angle.P = 80.0;
-        __motor.P_angle.I = 0.01;
+        __motor.P_angle.P = 100.0;
+        __motor.P_angle.I = 0.00;
         __motor.P_angle.D = 0;
         __motor.P_angle.output_ramp = 10000.0;
-        __motor.P_angle.limit = 200.0;
+        __motor.P_angle.limit = 1000.0;
         // // Low pass filtering time constant
         __motor.LPF_angle.Tf = 0;
 
         // setting the limits
         // maximal velocity of the position control
-        __motor.velocity_limit = 150; // rad/s - default 20
+        __motor.velocity_limit = 300; // rad/s - default 20
         __motor.voltage_limit = 10.0;
         __motor.current_limit = 1.5;
 
