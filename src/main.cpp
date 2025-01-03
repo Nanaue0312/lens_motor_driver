@@ -23,7 +23,6 @@ void setup()
   // utlog::start_async(512);
   UTINFO("Follow Focus Motor Starting...");
   bool device_is_ok = FMotorDriver::instance().begin();
-
   CtrlMang::instance().begin();
   if (device_is_ok)
   {
@@ -41,7 +40,6 @@ void setup()
 
   // CtrlMang::instance().set_device_state(DeviceState::PAIRING);
 
-  // FMotorDriver::instance().calibration();
   UTINFO("Follow Focus Motor Started.");
   utcollab::Task(&FMotorDriver::run_forever, &FMotorDriver::instance()).detach();
   utcollab::Task(recveive_handler).detach();
