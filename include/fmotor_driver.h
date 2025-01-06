@@ -64,19 +64,19 @@ public:
     // __motor.LPF_current_d.Tf = 0.5;
     __motor.foc_modulation = FOCModulationType::SpaceVectorPWM;
 
-    // __motor.target = 2;
-    // velocity loop PID
-    // __motor.PID_velocity.P = 0.3;
-    // __motor.PID_velocity.I = 0.3;
-    // __motor.PID_velocity.D = 0.001;
-    // todo 调整还是存在卡顿
-    __motor.PID_velocity.P = 0.3;
-    __motor.PID_velocity.I = 0.000;
-    __motor.PID_velocity.D = 0;
-    __motor.PID_velocity.output_ramp = 10000;
-    __motor.PID_velocity.limit = 20;
-    // Low pass filtering time constant
-    __motor.LPF_velocity.Tf = 0.01;
+        // __motor.target = 2;
+        // velocity loop PID
+        // __motor.PID_velocity.P = 0.3;
+        // __motor.PID_velocity.I = 0.3;
+        // __motor.PID_velocity.D = 0.001;
+        // todo 调整还是存在卡顿
+        __motor.PID_velocity.P = 0.010f;
+        __motor.PID_velocity.I = 0.001;
+        __motor.PID_velocity.D = 0;
+        __motor.PID_velocity.output_ramp = 10000;
+        __motor.PID_velocity.limit = 1.5;
+        // Low pass filtering time constant
+        __motor.LPF_velocity.Tf = 0.2;
 
     // angle loop PID
     // __motor.P_angle = angle_pid_0;
