@@ -8,6 +8,7 @@
 #include "app_version.h"
 SimpleProtocolImpl *sprotocol_report = dynamic_cast<SimpleProtocolImpl *>(new SimpleProtocolTpl<1, 1, true, 32, 0>({0xA5, 0xAB}));
 lens_motor_data_t motor_report_data;
+broadcast_data_t *received_data{0};
 void recveive_handler();
 // 上报状态任务
 void report_status_task();
@@ -63,11 +64,15 @@ void handle_calibration(uint8_t cal_flag, float target_value)
   switch (cal_flag)
   {
   case 0:
-    FMotorDriver::instance().calibration();
+    if (CtrlMang::instance().device_state != DeviceState::CALIBRATION)
+    {
+      FMotorDriver::instance().calibration();
+    }
     break;
   case 2:
-    FMotorDriver::instance().stop_calibration();
+
     FMotorDriver::instance().target_angle = target_value;
+
     break;
     // case 1,3: do nothing
   }
@@ -134,8 +139,7 @@ void recveive_handler()
       {
         if (frm.is_valid())
         {
-          auto *received_data = reinterpret_cast<broadcast_data_t *>(
-              const_cast<uint8_t *>(frm.data.data()));
+          received_data = reinterpret_cast<broadcast_data_t *>(const_cast<uint8_t *>(frm.data.data()));
 
           auto current_mode = CtrlMang::instance().get_motor_func_mode();
           UTDEBUG("current mode: ", current_mode);
@@ -158,8 +162,12 @@ void report_status_task()
     motor_report_data.mac = AppVersion::mac();
     motor_report_data.value = FMotorDriver::instance().get_current_target();
     if (CtrlMang::instance().device_state == DeviceState::CALIBRATION)
-      motor_report_data.flag_status_cal = 2;
+      motor_report_data.flag_status_cal = 1;
     else if (CtrlMang::instance().device_state == DeviceState::CALIBRATION_OK)
+    {
+      motor_report_data.flag_status_cal = 2;
+    }
+    else if (CtrlMang::instance().device_state == DeviceState::CALIBRATION_ERROR)
     {
       motor_report_data.flag_status_cal = 3;
     }
