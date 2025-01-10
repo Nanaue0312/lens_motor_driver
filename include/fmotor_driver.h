@@ -64,19 +64,19 @@ public:
     // __motor.LPF_current_d.Tf = 0.5;
     __motor.foc_modulation = FOCModulationType::SpaceVectorPWM;
 
-        // __motor.target = 2;
-        // velocity loop PID
-        // __motor.PID_velocity.P = 0.3;
-        // __motor.PID_velocity.I = 0.3;
-        // __motor.PID_velocity.D = 0.001;
-        // todo 调整还是存在卡顿
-        __motor.PID_velocity.P = 0.010f;
-        __motor.PID_velocity.I = 0.001;
-        __motor.PID_velocity.D = 0;
-        __motor.PID_velocity.output_ramp = 10000;
-        __motor.PID_velocity.limit = 1.5;
-        // Low pass filtering time constant
-        __motor.LPF_velocity.Tf = 0.2;
+    // __motor.target = 2;
+    // velocity loop PID
+    // __motor.PID_velocity.P = 0.3;
+    // __motor.PID_velocity.I = 0.3;
+    // __motor.PID_velocity.D = 0.001;
+    // todo 调整还是存在卡顿
+    __motor.PID_velocity.P = 0.010f;
+    __motor.PID_velocity.I = 0.001;
+    __motor.PID_velocity.D = 0;
+    __motor.PID_velocity.output_ramp = 10000;
+    __motor.PID_velocity.limit = 1.5;
+    // Low pass filtering time constant
+    __motor.LPF_velocity.Tf = 0.2;
 
     // angle loop PID
     // __motor.P_angle = angle_pid_0;
@@ -96,6 +96,7 @@ public:
 
     __motor.phase_resistance = 5;
     __motor.modulation_centered = 1.0;
+    // __motor.zero_electric_angle = 3.179;
   }
 
   virtual ~FMotorDriver() = default;
@@ -356,8 +357,9 @@ private:
     // 校准结束
   CALIBRATION_END:
     __angle_range.swap(cal_range); // 交换角度范围
-  CALIBRATION_STOPPED:
     CtrlMang::instance().set_device_state(DeviceState::CALIBRATION_OK);
+
+  CALIBRATION_STOPPED:
     __motor.velocity_limit = 300;
     // UTTRACE("Calibration Motor Range of Motion is: [", __angle_range.first, ",",
     //         __angle_range.second, "]");

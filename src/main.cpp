@@ -6,12 +6,16 @@
 #include "simple_protocol_impl.h"
 #include "simple_protocol_tpl.h"
 #include "app_version.h"
+#include "EEPROM.h"
+#include "PVD_confid.h"
+
 SimpleProtocolImpl *sprotocol_report = dynamic_cast<SimpleProtocolImpl *>(new SimpleProtocolTpl<1, 1, true, 32, 0>({0xA5, 0xAB}));
 lens_motor_data_t motor_report_data;
 broadcast_data_t *received_data{0};
 void recveive_handler();
 // 上报状态任务
 void report_status_task();
+void save_motor_position();
 void setup()
 {
   // sys_nvic_set_vector_table(FLASH_BASE, 0x4000);
@@ -23,10 +27,13 @@ void setup()
   // utlog::bind_print(print_func);
   // utlog::start_async(512);
   UTINFO("Follow Focus Motor Starting...");
+  float last_position = 0;
+  EEPROM.get(0, last_position);
   bool device_is_ok = FMotorDriver::instance().begin();
   CtrlMang::instance().begin();
   if (device_is_ok)
   {
+    FMotorDriver::instance().target_angle = last_position;
     CtrlMang::instance().set_device_state(DeviceState::RUNNING);
   }
   else
@@ -35,7 +42,7 @@ void setup()
   }
 
   // FMotorDriver::instance().monitor_init(Serial);
-  // PVD_config();
+  PVD_config();
 
   UTINFO("CtrlMang Starting...");
 
@@ -148,6 +155,9 @@ void recveive_handler()
         }
       }
     }
+    // if (motor.move_flag) {
+    //     save_motor_position();
+    // }
     utcollab::Task::sleep_for(5);
   }
 }
@@ -176,4 +186,10 @@ void report_status_task()
     Serial.write(frame().data(), frame().size());
     utcollab::Task::sleep_for(15);
   }
+}
+
+void save_motor_position() {
+    float current_pos = FMotorDriver::instance().get_current_target();
+    // STM32不需要commit，直接使用put即可
+    EEPROM.put(0, current_pos);
 }
