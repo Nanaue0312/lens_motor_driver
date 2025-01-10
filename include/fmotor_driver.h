@@ -70,7 +70,7 @@ public:
     // __motor.PID_velocity.I = 0.3;
     // __motor.PID_velocity.D = 0.001;
     // todo 调整还是存在卡顿
-    __motor.PID_velocity.P = 0.010f;
+    __motor.PID_velocity.P = 0.013f;
     __motor.PID_velocity.I = 0.001;
     __motor.PID_velocity.D = 0;
     __motor.PID_velocity.output_ramp = 10000;

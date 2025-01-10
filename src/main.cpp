@@ -11,7 +11,7 @@
 
 SimpleProtocolImpl *sprotocol_report = dynamic_cast<SimpleProtocolImpl *>(new SimpleProtocolTpl<1, 1, true, 32, 0>({0xA5, 0xAB}));
 lens_motor_data_t motor_report_data;
-broadcast_data_t *received_data{0};
+broadcast_data_t received_data;
 void recveive_handler();
 // 上报状态任务
 void report_status_task();
@@ -66,7 +66,7 @@ void loop()
   // not used
 }
 
-void handle_calibration(uint8_t cal_flag, float target_value)
+void handle_calibration(uint8_t cal_flag, float target_value, float hitwall)
 {
   switch (cal_flag)
   {
@@ -77,8 +77,15 @@ void handle_calibration(uint8_t cal_flag, float target_value)
     }
     break;
   case 2:
-
-    FMotorDriver::instance().target_angle = target_value;
+    if (target_value > hitwall && hitwall != 0)
+    {
+      FMotorDriver::instance().target_angle = hitwall;
+    }
+    else 
+    {
+      FMotorDriver::instance().target_angle = target_value;
+    }
+  case 3:
 
     break;
     // case 1,3: do nothing
@@ -110,15 +117,15 @@ void process_mode_data(MotorFuncMode mode, const broadcast_data_t *data)
   switch (mode)
   {
   case MotorFuncMode::ZOOM:
-    handle_calibration(data->motorflag_zoom_cal, data->zoom);
+    handle_calibration(data->motorflag_zoom_status, data->zoom, 1);
     handle_speed_setting(data->motorflag_zoom_speed);
     break;
   case MotorFuncMode::IRIS:
-    handle_calibration(data->motorflag_iris_cal, data->iris);
+    handle_calibration(data->motorflag_iris_status, data->iris, 1);
     handle_speed_setting(data->motorflag_iris_speed);
     break;
   case MotorFuncMode::FOCUS:
-    handle_calibration(data->motorflag_focus_cal, data->focus);
+    handle_calibration(data->motorflag_focus_status, data->focus, data->hitwall);
     handle_speed_setting(data->motorflag_focus_speed);
     break;
   }
@@ -146,12 +153,13 @@ void recveive_handler()
       {
         if (frm.is_valid())
         {
-          received_data = reinterpret_cast<broadcast_data_t *>(const_cast<uint8_t *>(frm.data.data()));
+          // received_data = mootreinterpret_cast<broadcast_data_t *>(const_cast<uint8_t *>(frm.data.data()));
+          memcpy(&received_data, frm.data.data(), sizeof(broadcast_data_t));
 
           auto current_mode = CtrlMang::instance().get_motor_func_mode();
           UTDEBUG("current mode: ", current_mode);
 
-          process_mode_data(current_mode, received_data);
+          process_mode_data(current_mode, &received_data);
         }
       }
     }
@@ -177,10 +185,7 @@ void report_status_task()
     {
       motor_report_data.flag_status_cal = 2;
     }
-    else if (CtrlMang::instance().device_state == DeviceState::CALIBRATION_ERROR)
-    {
-      motor_report_data.flag_status_cal = 3;
-    }
+
     auto frame{sprotocol_report->make_packer(1, 32)};
     frame.push_back(&motor_report_data, sizeof(lens_motor_data_t)).end_pack();
     Serial.write(frame().data(), frame().size());
@@ -188,8 +193,9 @@ void report_status_task()
   }
 }
 
-void save_motor_position() {
-    float current_pos = FMotorDriver::instance().get_current_target();
-    // STM32不需要commit，直接使用put即可
-    EEPROM.put(0, current_pos);
+void save_motor_position()
+{
+  float current_pos = FMotorDriver::instance().get_current_target();
+  // STM32不需要commit，直接使用put即可
+  EEPROM.put(0, current_pos);
 }
