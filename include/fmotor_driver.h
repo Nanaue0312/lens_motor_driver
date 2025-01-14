@@ -319,7 +319,7 @@ private:
       auto curr_angle = __sensor.getAngle(); // 获取当前角度
       if (std::abs(curr_angle - last_angle) < 0.1)
       {
-        cal_range.second = curr_angle - 1.5;
+        cal_range.second = curr_angle - 0;
         goto CALIBRATION_SETP2; // 跳转到阶段2
       }
       last_angle = curr_angle; // 获取当前角度
@@ -330,7 +330,7 @@ private:
   CALIBRATION_SETP2: // 跳转设置2
     // UTTRACE("Calibration Motor Backward.");
     start_time = utime::boot_ts();          // 记录开始时间
-    __target_angle = cal_range.second - 20; // 设置目标角度
+    __target_angle = cal_range.second - 2; // 设置目标角度
     while (millis() - start_time < timeout) // 最多执行1分钟
     {
       if (__calibrate_stop)
@@ -342,7 +342,7 @@ private:
       auto curr_angle = __sensor.getAngle(); // 获取当前角度
       if (std::abs(curr_angle - last_angle) < 0.1)
       {
-        cal_range.first = curr_angle + 1.5;
+        cal_range.first = curr_angle + 0;
         goto CALIBRATION_END; // 跳转到阶段3
       }
       last_angle = curr_angle; // 获取当前角度
