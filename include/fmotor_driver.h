@@ -91,8 +91,8 @@ public:
     // setting the limits
     // maximal velocity of the position control
     __motor.velocity_limit = 300; // rad/s - default 20
-    __motor.voltage_limit = 10.0;
-    __motor.current_limit = 1.5;
+    __motor.voltage_limit = 18.0;
+    __motor.current_limit = 2;
 
     __motor.phase_resistance = 5;
     __motor.modulation_centered = 1.0;
