@@ -268,7 +268,7 @@ public:
 
 private:
   // 电机角度范围
-  std::pair<float, float> __angle_range{0, 45};
+  std::pair<float, float> __angle_range{0, 5};
 
   // voltage set point variable
   float __target_angle = 0;
