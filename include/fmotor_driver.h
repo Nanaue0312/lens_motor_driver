@@ -303,7 +303,7 @@ private:
     float cal_angle{0.0};                    // 获取当前角度
     bool flag_direction{true};               // 方向标志
     float last_angle{0};                     // 上一次角度
-    std::pair<float, float> cal_range{0, 0}; // 校准范围
+    std::pair<float, float> cal_range{0, 0}; // 临时存储新的校准范围
     int16_t now = 0;
     // 阶段1：电机正转
     // UTTRACE("Calibration Motor Forward.");
@@ -356,7 +356,7 @@ private:
 
     // 校准结束
   CALIBRATION_END:
-    __angle_range.swap(cal_range); // 交换角度范围
+    __angle_range.swap(cal_range); // 这里会改变校准范围
     CtrlMang::instance().set_device_state(DeviceState::CALIBRATION_OK);
 
   CALIBRATION_STOPPED:

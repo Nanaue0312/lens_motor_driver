@@ -27,13 +27,13 @@ void setup()
   // utlog::bind_print(print_func);
   // utlog::start_async(512);
   UTINFO("Follow Focus Motor Starting...");
-  float last_position = 0;
-  EEPROM.get(0, last_position);
+  // float last_position = 0;
+  // EEPROM.get(0, last_position);
   bool device_is_ok = FMotorDriver::instance().begin();
   CtrlMang::instance().begin();
   if (device_is_ok)
   {
-    FMotorDriver::instance().target_angle = last_position;
+    // FMotorDriver::instance().target_angle = last_position;
     CtrlMang::instance().set_device_state(DeviceState::RUNNING);
   }
   else
@@ -42,7 +42,7 @@ void setup()
   }
 
   // FMotorDriver::instance().monitor_init(Serial);
-  PVD_config();
+  // PVD_config();
 
   UTINFO("CtrlMang Starting...");
 
