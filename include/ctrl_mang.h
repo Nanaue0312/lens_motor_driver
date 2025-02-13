@@ -20,14 +20,14 @@
 /// @brief 设备的状态
 enum class DeviceState
 {
-    NONE,        // 未初始化
-    INIT,        // 初始化中
-    PAIRING,     // 配对中
-    CALIBRATION, // 校准中
-    CALIBRATION_OK, // 校准成功
+    NONE,              // 未初始化
+    INIT,              // 初始化中
+    PAIRING,           // 配对中
+    CALIBRATION,       // 校准中
+    CALIBRATION_OK,    // 校准成功
     CALIBRATION_ERROR, // 校准错误
-    RUNNING,     // 运行中
-    ERROR,       // 错误
+    RUNNING,           // 运行中
+    ERROR,             // 错误
 };
 
 /// @brief 电机控制模式
@@ -293,11 +293,23 @@ private:
                 break;
             case Keyboard::Event::PRESSED:
                 // 处理按下事件
-                UTDEBUG("Shift pressed");
+                switch (motor_func_mode)
+                {
+                case MotorFuncMode::FOCUS:
+                    motor_func_mode = MotorFuncMode::ZOOM;
+                    break;
+                case MotorFuncMode::ZOOM:
+                    motor_func_mode = MotorFuncMode::IRIS;
+                    break;
+                case MotorFuncMode::IRIS:
+                    motor_func_mode = MotorFuncMode::FOCUS;
+                    break;
+                }
+                UTDEBUG("Mode switched to: ", static_cast<int>(motor_func_mode));
                 break;
             case Keyboard::Event::DOUBLE_CLICK:
-                // TODO: 处理双击事件
-                // UTDEBUG("Shift double click");
+                // 双击SHIFT键切换模式
+
                 break;
             case Keyboard::Event::RELEASED:
                 // 处理释放事件
