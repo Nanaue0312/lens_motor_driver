@@ -29,8 +29,19 @@ void setup()
   UTINFO("Follow Focus Motor Starting...");
   // float last_position = 0;
   // EEPROM.get(0, last_position);
+  
+  // 读取上次保存的模式
+  uint8_t saved_mode = 0;
+  EEPROM.get(sizeof(float), saved_mode);  // 从position后面的地址读取模式
+  
   bool device_is_ok = FMotorDriver::instance().begin();
   CtrlMang::instance().begin();
+  
+  // 设置保存的模式
+  if (saved_mode > 0 && saved_mode <= 3) {  // 确保模式值有效
+    CtrlMang::instance().set_motor_func_mode(static_cast<MotorFuncMode>(saved_mode));
+  }
+
   if (device_is_ok)
   {
     // FMotorDriver::instance().target_angle = last_position;
@@ -94,9 +105,12 @@ void handle_calibration(uint8_t cal_flag, float target_value, float hitwall)
 
 void handle_speed_setting(uint8_t speed_flag)
 {
-  const float SPEED_SLOW = 0.007f;
-  const float SPEED_MEDIUM = 0.01f;
-  const float SPEED_FAST = 0.013f;
+  // const float SPEED_SLOW = 0.007f;
+  // const float SPEED_MEDIUM = 0.01f;
+  // const float SPEED_FAST = 0.013f;
+  const float SPEED_SLOW = 100.0f;
+  const float SPEED_MEDIUM = 200.0f;
+  const float SPEED_FAST = 300.0f;
 
   switch (speed_flag)
   {
@@ -133,7 +147,7 @@ void process_mode_data(MotorFuncMode mode, const broadcast_data_t *data)
 
 void recveive_handler()
 {
-  UTDEBUG("Serial recv handler started.");
+  // UTDEBUG("Serial recv handler started.");
   const size_t BUFFER_SIZE = 32;
   uint8_t recv_buffer[BUFFER_SIZE];
 
@@ -157,7 +171,7 @@ void recveive_handler()
           memcpy(&received_data, frm.data.data(), sizeof(broadcast_data_t));
 
           auto current_mode = CtrlMang::instance().get_motor_func_mode();
-          UTDEBUG("current mode: ", current_mode);
+          // UTDEBUG("current mode: ", current_mode);
 
           process_mode_data(current_mode, &received_data);
         }

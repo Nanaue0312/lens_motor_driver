@@ -142,7 +142,8 @@ public:
   /// @param speed 目标速度
   void set_speed(float speed)
   {
-    __motor.PID_velocity.P = speed;
+    // __motor.PID_velocity.P = speed;
+    __motor.velocity_limit = speed;
   }
 
   /// @brief 设定目标角度
@@ -168,13 +169,13 @@ public:
 
   /// @brief 设置电机的移动速度
   /// @param speed 速度值,每分钟的圈数rpm
-  void set_speed(float speed, uint8_t motor_type)
-  {
-    if (motor_type == 1)
-    {
-      __motor.PID_velocity.P = speed;
-    }
-  }
+  // void set_speed(float speed, uint8_t motor_type)
+  // {
+  //   if (motor_type == 1)
+  //   {
+  //     __motor.PID_velocity.P = speed;
+  //   }
+  // }
 
   /// @brief 运动到目标角度
   /// @note 调用频率大于1kHz
@@ -224,11 +225,11 @@ public:
     static float last_target_angle = 0.0f;
     if (!first_run)
     {
-      UTWARN("motor driver already run.");
+      // UTWARN("motor driver already run.");
       return;
     }
     first_run = false;
-    UTINFO("motor driver run forever.");
+    // UTINFO("motor driver run forever.");
     while (true) // 永久循环
     {
       if (!__calibrating_flag && move_flag)
@@ -289,6 +290,8 @@ private:
   inline static bool __calibrating_flag{false}; // 正校准标志位
   bool __calibrate_stop{false};                 // 校准停止标志位
 
+  float __saved_velocity_limit = 300; // 添加成员变量保存速度
+
   /// @brief 校准电机
   /// @note 用于确定电机转动的角度上限
   /// @param velocity_limit 校准速度限制
@@ -297,12 +300,15 @@ private:
   {
     // UTTRACE("Calibration Motor Start.");
     CtrlMang::instance().set_device_state(DeviceState::CALIBRATION);
-    __calibrating_flag = true;               // 设置校准标志位
-    __calibrate_stop = false;                // 重置校准停止标志位
-    __motor.velocity_limit = velocity_limit; // 设置电机速度限制
-    float cal_angle{0.0};                    // 获取当前角度
-    bool flag_direction{true};               // 方向标志
-    float last_angle{0};                     // 上一次角度
+    __calibrating_flag = true;                       // 设置校准标志位
+    __calibrate_stop = false;                        // 重置校准停止标志位
+    __saved_velocity_limit = __motor.velocity_limit; // 保存当前速度
+    __motor.velocity_limit = velocity_limit;         // 设置校准速度
+    float cal_angle{0.0};                            // 获取当前角度
+    bool flag_direction{true};                       // 方向标志
+    float last_angle{0};                             // 上一次角度
+    const float SAFETY_MARGIN = 0.3;                 // 安全边距
+
     std::pair<float, float> cal_range{0, 0}; // 临时存储新的校准范围
     int16_t now = 0;
     // 阶段1：电机正转
@@ -330,7 +336,7 @@ private:
   CALIBRATION_SETP2: // 跳转设置2
     // UTTRACE("Calibration Motor Backward.");
     start_time = utime::boot_ts();          // 记录开始时间
-    __target_angle = cal_range.second - 2; // 设置目标角度
+    __target_angle = cal_range.second - 0;  // 设置目标角度
     while (millis() - start_time < timeout) // 最多执行1分钟
     {
       if (__calibrate_stop)
@@ -356,11 +362,15 @@ private:
 
     // 校准结束
   CALIBRATION_END:
+    // 将校准范围向内收缩一定余量，避免触碰机械限位
+    cal_range.first += SAFETY_MARGIN;  // 最小值增加一点
+    cal_range.second -= SAFETY_MARGIN; // 最大值减少一点
+
     __angle_range.swap(cal_range); // 这里会改变校准范围
     CtrlMang::instance().set_device_state(DeviceState::CALIBRATION_OK);
+    __motor.velocity_limit = __saved_velocity_limit; // 恢复之前保存的速度
 
   CALIBRATION_STOPPED:
-    __motor.velocity_limit = 300;
     // UTTRACE("Calibration Motor Range of Motion is: [", __angle_range.first, ",",
     //         __angle_range.second, "]");
     // UTTRACE("Calibration Motor End.");

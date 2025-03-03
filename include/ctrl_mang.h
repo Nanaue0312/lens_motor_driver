@@ -8,6 +8,7 @@
 #include "state_led.h"
 #include "keyboard.h"
 #include "keymap.h"
+#include "EEPROM.h"
 
 /// @brief 状态LED定义
 #define STATE_LED1_PIN PA0 // LED_G
@@ -120,6 +121,10 @@ public:
                 break;
             }
         }
+    }
+
+    void set_motor_func_mode(MotorFuncMode mode) {
+        motor_func_mode = mode;
     }
 
 private:
@@ -297,12 +302,15 @@ private:
                 {
                 case MotorFuncMode::FOCUS:
                     motor_func_mode = MotorFuncMode::ZOOM;
+                    EEPROM.put(sizeof(float), static_cast<uint8_t>(motor_func_mode));  // 保存模式
                     break;
                 case MotorFuncMode::ZOOM:
                     motor_func_mode = MotorFuncMode::IRIS;
+                    EEPROM.put(sizeof(float), static_cast<uint8_t>(motor_func_mode));  // 保存模式
                     break;
                 case MotorFuncMode::IRIS:
                     motor_func_mode = MotorFuncMode::FOCUS;
+                    EEPROM.put(sizeof(float), static_cast<uint8_t>(motor_func_mode));  // 保存模式
                     break;
                 }
                 UTDEBUG("Mode switched to: ", static_cast<int>(motor_func_mode));
